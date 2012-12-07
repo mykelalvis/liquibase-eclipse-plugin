@@ -4,36 +4,36 @@
    <extension
          point="org.eclipse.ui.views">
       <category
-            id="liquibase.ide.category"
-            name="%liquibase.ide.category">
+            id="com.svcdelivery.liquibase.eclipse.category"
+            name="%com.svcdelivery.liquibase.eclipse.category">
       </category>
       <view
-            category="liquibase.ide.category"
-            class="liquibase.ide.LiquibaseResultsViewPart"
+            category="com.svcdelivery.liquibase.eclipse.category"
+            class="com.svcdelivery.liquibase.eclipse.LiquibaseResultsViewPart"
             icon="images/run_exc.gif"
-            id="liquibase.ide.resultsview"
-            name="%liquibase.ide.resultsview"
+            id="com.svcdelivery.liquibase.eclipse.resultsview"
+            name="%com.svcdelivery.liquibase.eclipse.resultsview"
             restorable="true">
       </view>
       <view
-            category="liquibase.ide.category"
-            class="liquibase.ide.ScriptsViewPart"
+            category="com.svcdelivery.liquibase.eclipse.category"
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.ScriptsViewPart"
             icon="images/script.gif"
-            id="liquibase.ide.scriptsview"
-            name="%liquibase.ide.scriptsview"
+            id="com.svcdelivery.liquibase.eclipse.scriptsview"
+            name="%com.svcdelivery.liquibase.eclipse.scriptsview"
             restorable="true">
       </view>
       <view
-            category="liquibase.ide.category"
-            class="liquibase.ide.DataSourceViewPart"
+            category="com.svcdelivery.liquibase.eclipse.category"
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.DataSourceViewPart"
             icon="images/database.gif"
-            id="liquibase.ide.datasourceview"
-            name="%liquibase.ide.datasourceview"
+            id="com.svcdelivery.liquibase.eclipse.datasourceview"
+            name="%com.svcdelivery.liquibase.eclipse.datasourceview"
             restorable="true">
       </view>
    </extension>
    <extension
-         id="liquibase.ide.LiquibaseBuilder"
+         id="com.svcdelivery.liquibase.eclipse.LiquibaseBuilder"
          point="org.eclipse.core.resources.builders">
       <builder
             callOnEmptyDelta="false"
@@ -41,39 +41,39 @@
             isConfigurable="true"
             supportsConfigurations="false">
          <run
-               class="liquibase.ide.LiquibaseBuilder">
+               class="com.svcdelivery.liquibase.eclipse.internal.ui.LiquibaseBuilder">
          </run>
       </builder>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <category
-            id="liquibase.ide.menu.category"
-            name="%liquibase.ide.menu.category">
+            id="com.svcdelivery.liquibase.eclipse.menu.category"
+            name="%com.svcdelivery.liquibase.eclipse.menu.category">
       </category>
       <command
-            categoryId="liquibase.ide.menu.category"
-            defaultHandler="liquibase.ide.UpdateCommandHandler"
-            id="liquibase.ide.update"
-            name="%liquibase.ide.update">
+            categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
+            defaultHandler="com.svcdelivery.liquibase.eclipse.UpdateCommandHandler"
+            id="com.svcdelivery.liquibase.eclipse.update"
+            name="%com.svcdelivery.liquibase.eclipse.update">
       </command>
       <command
-            categoryId="liquibase.ide.menu.category"
-            defaultHandler="liquibase.ide.RollbackCommandHandler"
-            id="liquibase.ide.rollback"
-            name="%liquibase.ide.rollback">
+            categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
+            defaultHandler="com.svcdelivery.liquibase.eclipse.RollbackCommandHandler"
+            id="com.svcdelivery.liquibase.eclipse.rollback"
+            name="%com.svcdelivery.liquibase.eclipse.rollback">
       </command>
       <command
-            categoryId="liquibase.ide.menu.category"
-            id="liquibase.ide.convertToLiquibase"
-            name="%liquibase.ide.convertToLiquibase">
+            categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
+            id="com.svcdelivery.liquibase.eclipse.convertToLiquibase"
+            name="%com.svcdelivery.liquibase.eclipse.convertToLiquibase">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="liquibase.ide.UpdateCommandHandler"
-            commandId="liquibase.ide.update">
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.UpdateCommandHandler"
+            commandId="com.svcdelivery.liquibase.eclipse.update">
          <activeWhen>
             <iterate
                   ifEmpty="false"
@@ -89,8 +89,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="liquibase.ide.RollbackCommandHandler"
-            commandId="liquibase.ide.rollback">
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.RollbackCommandHandler"
+            commandId="com.svcdelivery.liquibase.eclipse.rollback">
          <activeWhen>
             <iterate
                   ifEmpty="false"
@@ -106,8 +106,8 @@
          </activeWhen>
       </handler>
       <handler
-            class="liquibase.ide.ConvertToLiquibaseCommandHandler"
-            commandId="liquibase.ide.convertToLiquibase">
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.ConvertToLiquibaseCommandHandler"
+            commandId="com.svcdelivery.liquibase.eclipse.convertToLiquibase">
          <activeWhen>
             <iterate>
                <and>
@@ -117,7 +117,7 @@
                   <not>
                      <test
                            property="org.eclipse.core.resources.projectNature"
-                           value="liquibase.ide">
+                           value="com.svcdelivery.liquibase.eclipse">
                      </test>
                   </not>
                </and>
@@ -132,12 +132,12 @@
             locationURI="popup:org.eclipse.ui.popup.any">
          <menu
                icon="images/ide.png"
-               id="liquibase.ide.category"
-               label="%liquibase.ide.category">
+               id="com.svcdelivery.liquibase.eclipse.category"
+               label="%com.svcdelivery.liquibase.eclipse.category">
             <command
-                  commandId="liquibase.ide.update"
+                  commandId="com.svcdelivery.liquibase.eclipse.update"
                   icon="images/run_exc.gif"
-                  label="%liquibase.ide.update"
+                  label="%com.svcdelivery.liquibase.eclipse.update"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -153,9 +153,9 @@
                </visibleWhen>
             </command>
             <command
-                  commandId="liquibase.ide.rollback"
+                  commandId="com.svcdelivery.liquibase.eclipse.rollback"
                   icon="images/fail.gif"
-                  label="%liquibase.ide.rollback"
+                  label="%com.svcdelivery.liquibase.eclipse.rollback"
                   style="push">
                <visibleWhen
                      checkEnabled="false">
@@ -177,9 +177,9 @@
             allPopups="false"
             locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
          <command
-               commandId="liquibase.ide.convertToLiquibase"
+               commandId="com.svcdelivery.liquibase.eclipse.convertToLiquibase"
                icon="images/ide.png"
-               label="%liquibase.ide.convertToLiquibase"
+               label="%com.svcdelivery.liquibase.eclipse.convertToLiquibase"
                style="push">
             <visibleWhen
                   checkEnabled="false">
@@ -192,7 +192,7 @@
                      <not>
                         <test
                               property="org.eclipse.core.resources.projectNature"
-                              value="liquibase.ide">
+                              value="com.svcdelivery.liquibase.eclipse">
                         </test>
                      </not>
                   </and>
@@ -202,13 +202,23 @@
       </menuContribution>
    </extension>
    <extension
-         id="liquibase.ide"
+         id="com.svcdelivery.liquibase.eclipse"
          point="org.eclipse.core.resources.natures">
       <runtime>
          <run
-               class="liquibase.ide.LiquibaseNature">
+               class="com.svcdelivery.liquibase.eclipse.internal.ui.LiquibaseNature">
          </run>
       </runtime>
+   </extension>
+   <extension
+         point="org.eclipse.wst.xml.core.catalogContributions">
+      <catalogContribution>
+         <uri
+               id="databaseChangeLog"
+               name="http://www.liquibase.org/xml/ns/dbchangelog"
+               uri="resources/dbchangelog-2.1.xsd">
+         </uri>
+      </catalogContribution>
    </extension>
 
 </plugin>

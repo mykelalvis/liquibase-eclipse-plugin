@@ -93,9 +93,11 @@ public class UpdateScriptsWizard extends Wizard {
 					result.setTimestamp(System.currentTimeMillis());
 					result.setScript(file.getName());
 					Activator.getDefault().getResults().add(result);
-					final String changeLogFile = file.getLocation().toString();
+					final String changeLogFile = file.getProjectRelativePath()
+							.removeFirstSegments(1).toString();
 					final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-							file.getParent().getLocation().toString());
+							file.getWorkspace().getRoot().getLocation()
+									.toString());
 					final Connection connection = ConnectionUtil
 							.getConnection(profile);
 					if (connection != null) {
