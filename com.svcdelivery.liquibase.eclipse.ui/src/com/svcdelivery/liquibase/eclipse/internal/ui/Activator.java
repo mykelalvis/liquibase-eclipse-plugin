@@ -39,20 +39,12 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * The results from running the last changelog.
 	 */
-	private final LiquibaseResults results;
+	private LiquibaseResults results;
 
 	/**
 	 * Cache of changelog files found in liquibase projects.
 	 */
-	private final ChangeLogCache changeLogCache;
-
-	/**
-	 * The constructor.
-	 */
-	public Activator() {
-		results = new LiquibaseResults();
-		changeLogCache = new ChangeLogCache();
-	}
+	private ChangeLogCache changeLogCache;
 
 	/**
 	 * @param context
@@ -66,6 +58,8 @@ public class Activator extends AbstractUIPlugin {
 	public final void start(final BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		changeLogCache = new ChangeLogCache();
+		results = new LiquibaseResults();
 		for (final LiquibaseResultStatus status : LiquibaseResultStatus
 				.values()) {
 			registerImage(status.getFileName());

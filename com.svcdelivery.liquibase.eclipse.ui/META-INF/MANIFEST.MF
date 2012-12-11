@@ -8,12 +8,12 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.datatools.connectivity,
- org.eclipse.wst.xml.core
+ org.eclipse.wst.xml.core,
+ org.liquibase.osgi;bundle-version="2.0.5"
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ClassPath: .,
  lib/jbossjta.jar,
  lib/jboss-transaction-api_1.1_spec-1.0.0.Final.jar,
- lib/jboss-logging.jar,
- lib/liquibase-2.0.5.jar
+ lib/jboss-logging.jar
