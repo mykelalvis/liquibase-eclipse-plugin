@@ -16,6 +16,7 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -93,8 +94,9 @@ public class UpdateScriptsWizard extends Wizard {
 					result.setTimestamp(System.currentTimeMillis());
 					result.setScript(file.getName());
 					Activator.getDefault().getResults().add(result);
-					final String changeLogFile = file.getProjectRelativePath()
-							.removeFirstSegments(1).toString();
+					final String changeLogFile = file.getProject().getName()
+							+ File.separator
+							+ file.getProjectRelativePath().toString();
 					final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
 							file.getWorkspace().getRoot().getLocation()
 									.toString());
