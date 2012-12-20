@@ -16,10 +16,11 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.util.List;
+import java.util.Map;
 
 import liquibase.changelog.DatabaseChangeLog;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -49,9 +50,9 @@ public class ScriptsTreeContentProvider implements ITreeContentProvider {
 	public final Object[] getElements(final Object inputElement) {
 		Object[] elements = new Object[0];
 		if (cache != null) {
-			List<DatabaseChangeLog> changeLogs = cache.getChangeLogs();
+			Map<IFile, DatabaseChangeLog> changeLogs = cache.getChangeLogs();
 			if (changeLogs != null) {
-				elements = changeLogs.toArray();
+				elements = changeLogs.keySet().toArray();
 			}
 		}
 		return elements;

@@ -60,7 +60,7 @@ public class UpdateCommandHandler implements IHandler {
 		final IWizard targetWizard = new UpdateScriptsWizard(files);
 		final Shell shell = HandlerUtil.getActiveShell(event);
 		final WizardDialog dialog = new WizardDialog(shell, targetWizard);
-		dialog.setPageSize(400, 500);
+		dialog.setPageSize(400, 400);
 		dialog.open();
 		return null;
 	}

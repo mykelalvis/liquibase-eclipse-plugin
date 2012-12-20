@@ -16,9 +16,6 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
@@ -50,20 +47,30 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 	/**
 	 * Located change logs.
 	 */
-	private final List<DatabaseChangeLog> changeLogs;
+	private final ChangeLogCache changeLogCache;
 
 	/**
 	 * Constructor.
 	 */
 	public LiquibaseBuilderVisitor() {
 		factory = ChangeLogParserFactory.getInstance();
-		changeLogs = new ArrayList<DatabaseChangeLog>();
+		changeLogCache = Activator.getDefault().getChangeLogCache();
 	}
 
 	@Override
 	public final boolean visit(final IResourceDelta delta) throws CoreException {
-		final IResource resource = delta.getResource();
-		return visit(resource);
+		int kind = delta.getKind();
+		IResource resource = delta.getResource();
+		if (kind == IResourceDelta.ADDED || kind == IResourceDelta.CHANGED) {
+			visit(resource);
+		} else if (kind == IResourceDelta.REMOVED) {
+			if (resource instanceof IFile) {
+				IFile file = (IFile) resource;
+				changeLogCache.remove(file);
+			}
+		} else {
+		}
+		return true;
 	}
 
 	@Override
@@ -81,7 +88,7 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 							.parse(file.getLocation().toString(), params,
 									resourceAccessor);
 					if (changeLog != null) {
-						changeLogs.add(changeLog);
+						changeLogCache.add(file, changeLog);
 					}
 				} catch (final ChangeLogParseException e) {
 				} catch (final LiquibaseException e) {
@@ -91,13 +98,6 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 			}
 		}
 		return true;
-	}
-
-	/**
-	 * @return The located change logs.
-	 */
-	public final List<DatabaseChangeLog> getChangeLogs() {
-		return changeLogs;
 	}
 
 }
