@@ -21,16 +21,15 @@ import java.util.List;
 
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.datatools.connectivity.ProfileManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ListViewer;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Table;
 
 /**
  * @author nick
@@ -40,11 +39,11 @@ public class DataSourcePage extends WizardPage {
 	/**
 	 * The selected connection profile.
 	 */
-	private IConnectionProfile profile;
+	private IConnectionProfile[] profiles;
 	/**
 	 * A viewer to show available connection profiles.
 	 */
-	private ListViewer profilePicker;
+	private CheckboxTableViewer profilePicker;
 	/**
 	 * Flag to indicate when the user is navigating to the next page, used for
 	 * triggering events.
@@ -56,10 +55,16 @@ public class DataSourcePage extends WizardPage {
 	private final List<CompleteListener> listeners;
 
 	/**
+	 * Styles to apply to picker.
+	 */
+	private int style;
+
+	/**
 	 * Constructor.
 	 */
-	protected DataSourcePage() {
+	protected DataSourcePage(int style) {
 		super("Data Source");
+		this.style = style;
 		setTitle("Data Source");
 		setMessage("Select the Data Source to run the scripts against.");
 		listeners = new ArrayList<CompleteListener>();
@@ -71,25 +76,28 @@ public class DataSourcePage extends WizardPage {
 		final Composite root = new Composite(parent, SWT.NONE);
 		root.setLayout(new FillLayout());
 
-		profilePicker = new ListViewer(root, SWT.V_SCROLL);
+		Table profilePickerTable = new Table(root, SWT.V_SCROLL | SWT.CHECK
+				| style);
+		profilePicker = new CheckboxTableViewer(profilePickerTable);
 		profilePicker
 				.setContentProvider(new ConnectionProfileContentProvider());
 		profilePicker.setLabelProvider(new ConnectionProfileLabelProvider());
-		profilePicker
-				.addSelectionChangedListener(new ISelectionChangedListener() {
+		profilePicker.addCheckStateListener(new ICheckStateListener() {
 
-					@Override
-					public void selectionChanged(
-							final SelectionChangedEvent event) {
-						final ISelection selection = event.getSelection();
-						if (selection instanceof StructuredSelection) {
-							StructuredSelection ss = (StructuredSelection) selection;
-							profile = (IConnectionProfile) ss.getFirstElement();
-						}
-						updatePageComplete();
+			@Override
+			public void checkStateChanged(CheckStateChangedEvent event) {
+				Object[] elements = profilePicker.getCheckedElements();
+				List<IConnectionProfile> profileList = new ArrayList<IConnectionProfile>();
+				for (Object next : elements) {
+					if (next instanceof IConnectionProfile) {
+						profileList.add((IConnectionProfile) next);
 					}
-
-				});
+				}
+				profiles = profileList
+						.toArray(new IConnectionProfile[profileList.size()]);
+				updatePageComplete();
+			}
+		});
 		profilePicker.setInput(ProfileManager.getInstance().getProfiles());
 		setControl(root);
 	}
@@ -98,15 +106,22 @@ public class DataSourcePage extends WizardPage {
 	 * Update the page complete status.
 	 */
 	private void updatePageComplete() {
-		final boolean ok = profile != null;
+		final boolean ok = profiles != null && profiles.length > 0;
 		setPageComplete(ok);
 	}
 
 	/**
 	 * @return The selected connection profile.
 	 */
+	public final IConnectionProfile[] getProfiles() {
+		return profiles;
+	}
+
+	/**
+	 * @return The selected connection profile.
+	 */
 	public final IConnectionProfile getProfile() {
-		return profile;
+		return profiles[0];
 	}
 
 	@Override

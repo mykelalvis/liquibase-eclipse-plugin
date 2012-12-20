@@ -16,8 +16,9 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import liquibase.changelog.DatabaseChangeLog;
+import java.io.File;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -59,10 +60,11 @@ public class ScriptsTreeLabelProvider implements ITableLabelProvider {
 	public final String getColumnText(final Object element,
 			final int columnIndex) {
 		String text = "";
-		if (element instanceof DatabaseChangeLog) {
-			final DatabaseChangeLog log = (DatabaseChangeLog) element;
+		if (element instanceof IFile) {
+			final IFile log = (IFile) element;
 			if (columnIndex == 0) {
-				text = log.getFilePath();
+				text = log.getProject() + File.separator
+						+ log.getProjectRelativePath().toOSString();
 			}
 		}
 		return text;

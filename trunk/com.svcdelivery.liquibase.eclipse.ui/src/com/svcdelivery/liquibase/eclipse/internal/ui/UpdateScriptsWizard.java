@@ -16,7 +16,6 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.datatools.connectivity.IConnection;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
 
 import com.arjuna.ats.jta.UserTransaction;
 
@@ -64,15 +64,15 @@ public class UpdateScriptsWizard extends Wizard {
 
 	@Override
 	public final void addPages() {
-		dataSourcePage = new DataSourcePage();
+		dataSourcePage = new DataSourcePage(SWT.MULTI);
 		addPage(dataSourcePage);
 	}
 
 	@Override
 	public final boolean performFinish() {
 		boolean ok = true;
-		final IConnectionProfile profile = dataSourcePage.getProfile();
-		if (profile != null) {
+		final IConnectionProfile[] profiles = dataSourcePage.getProfiles();
+		if (profiles != null) {
 			final Job job = new Job("Run Liquibase Script") {
 
 				@Override
@@ -94,46 +94,45 @@ public class UpdateScriptsWizard extends Wizard {
 					result.setTimestamp(System.currentTimeMillis());
 					result.setScript(file.getName());
 					Activator.getDefault().getResults().add(result);
-					final String changeLogFile = file.getProject().getName()
-							+ File.separator
-							+ file.getProjectRelativePath().toString();
+					final String changeLogFile = file.getName();
 					final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-							file.getWorkspace().getRoot().getLocation()
-									.toString());
-					final Connection connection = ConnectionUtil
-							.getConnection(profile);
-					if (connection != null) {
-						try {
-							final javax.transaction.UserTransaction ut = UserTransaction
-									.userTransaction();
-							ut.begin();
+							file.getParent().getLocation().toString());
+					for (IConnectionProfile profile : profiles) {
+						final Connection connection = ConnectionUtil
+								.getConnection(profile);
+						if (connection != null) {
 							try {
-								final DatabaseConnection database = new JdbcConnection(
-										connection);
-								final Liquibase lb = new Liquibase(
-										changeLogFile, resourceAccessor,
-										database);
-								lb.update(null);
-								ut.commit();
-								result.setStatus(LiquibaseResultStatus.SUCCESS);
-							} catch (final LiquibaseException e) {
+								final javax.transaction.UserTransaction ut = UserTransaction
+										.userTransaction();
+								ut.begin();
+								try {
+									final DatabaseConnection database = new JdbcConnection(
+											connection);
+									final Liquibase lb = new Liquibase(
+											changeLogFile, resourceAccessor,
+											database);
+									lb.update(null);
+									ut.commit();
+									result.setStatus(LiquibaseResultStatus.SUCCESS);
+								} catch (final LiquibaseException e) {
+									e.printStackTrace();
+									ut.rollback();
+									result.setStatus(LiquibaseResultStatus.FAILURE);
+								}
+							} catch (final Exception e) {
 								e.printStackTrace();
-								ut.rollback();
 								result.setStatus(LiquibaseResultStatus.FAILURE);
+							} finally {
+								try {
+									connection.close();
+								} catch (final SQLException e) {
+									e.printStackTrace();
+								}
 							}
-						} catch (final Exception e) {
-							e.printStackTrace();
+						} else {
+							System.out.println("Failed to get connection.");
 							result.setStatus(LiquibaseResultStatus.FAILURE);
-						} finally {
-							try {
-								connection.close();
-							} catch (final SQLException e) {
-								e.printStackTrace();
-							}
 						}
-					} else {
-						System.out.println("Failed to get connection.");
-						result.setStatus(LiquibaseResultStatus.FAILURE);
 					}
 				}
 

@@ -21,6 +21,7 @@ import java.util.Map;
 
 import liquibase.changelog.DatabaseChangeLog;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -44,8 +45,7 @@ public class LiquibaseBuilder extends IncrementalProjectBuilder {
 			final IResourceDelta delta = getDelta(project);
 			delta.accept(visitor);
 		}
-		final List<DatabaseChangeLog> changeLogs = visitor.getChangeLogs();
-		Activator.getDefault().getChangeLogCache().setChangeLogs(changeLogs);
+		Activator.getDefault().getChangeLogCache().persist();
 		return null;
 	}
 

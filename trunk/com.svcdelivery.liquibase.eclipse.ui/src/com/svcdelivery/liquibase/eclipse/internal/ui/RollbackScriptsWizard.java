@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.wizard.Wizard;
+import org.eclipse.swt.SWT;
 
 import com.arjuna.ats.jta.UserTransaction;
 
@@ -67,7 +68,7 @@ public class RollbackScriptsWizard extends Wizard {
 
 	@Override
 	public final void addPages() {
-		dataSourcePage = new DataSourcePage();
+		dataSourcePage = new DataSourcePage(SWT.NONE);
 		scriptsPage = new InstalledScriptsPage(dataSourcePage);
 		addPage(dataSourcePage);
 		addPage(scriptsPage);
