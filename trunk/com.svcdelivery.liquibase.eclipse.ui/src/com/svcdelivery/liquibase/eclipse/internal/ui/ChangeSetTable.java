@@ -42,6 +42,16 @@ public class ChangeSetTable extends Composite {
 	private List<CompleteListener> listeners;
 
 	/**
+	 * Tree items.
+	 */
+	private List<ChangeSetTreeItem> items;
+
+	/**
+	 * True if all entries complete.
+	 */
+	private boolean complete;
+
+	/**
 	 * @param parent
 	 *            The parent composite.
 	 * @param style
@@ -67,6 +77,11 @@ public class ChangeSetTable extends Composite {
 		final TableColumn changeFileC = changeFileCV.getColumn();
 		changeFileC.setText("File");
 		changeFileC.setWidth(250);
+
+		final TableViewerColumn statusCV = new TableViewerColumn(tv, SWT.NONE);
+		final TableColumn statusC = statusCV.getColumn();
+		statusC.setText("Status");
+		statusC.setWidth(100);
 		tv.setContentProvider(new CollectionContentProvider());
 		tv.setLabelProvider(new ChangeSetLabelProvider());
 	}
@@ -77,6 +92,39 @@ public class ChangeSetTable extends Composite {
 	 */
 	public final void setInput(final List<ChangeSetTreeItem> input) {
 		tv.setInput(input);
+		items = input;
+		checkComplete();
+	}
+
+	/**
+	 * Checks if items are complete.
+	 */
+	private void checkComplete() {
+		boolean ok = true;
+		for (ChangeSetTreeItem item : items) {
+			if (item.getChangeLogFile() == null) {
+				ok = false;
+			}
+		}
+		complete = ok;
+		notifyListeners();
+	}
+
+	/**
+	 * Notify listeners of complete state.
+	 */
+	private void notifyListeners() {
+		for (CompleteListener listener : listeners) {
+			notifyListener(listener);
+		}
+	}
+
+	/**
+	 * @param listener
+	 *            The listener to notify.
+	 */
+	private void notifyListener(final CompleteListener listener) {
+		listener.complete(complete);
 	}
 
 	/**
@@ -85,5 +133,6 @@ public class ChangeSetTable extends Composite {
 	 */
 	public final void addCompletelistener(final CompleteListener listener) {
 		listeners.add(listener);
+		notifyListener(listener);
 	}
 }

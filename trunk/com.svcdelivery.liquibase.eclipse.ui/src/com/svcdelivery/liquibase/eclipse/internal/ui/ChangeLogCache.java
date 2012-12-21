@@ -51,6 +51,9 @@ public class ChangeLogCache {
 	 */
 	private Map<IFile, DatabaseChangeLog> logs;
 
+	/**
+	 * initialise the change log cache.
+	 */
 	public ChangeLogCache() {
 		load();
 	}
@@ -70,18 +73,28 @@ public class ChangeLogCache {
 		logs = changeLogs;
 	}
 
-	public void remove(IFile file) {
+	/**
+	 * @param file
+	 *            the file to remove.
+	 */
+	public final void remove(final IFile file) {
 		logs.remove(file);
 	}
 
-	public void add(IFile file, DatabaseChangeLog changeLog) {
+	/**
+	 * @param file
+	 *            The file to add.
+	 * @param changeLog
+	 *            The changelog, or null to lazy load.
+	 */
+	public final void add(final IFile file, final DatabaseChangeLog changeLog) {
 		logs.put(file, changeLog);
 	}
 
 	/**
 	 * Load the cached data from storage.
 	 */
-	public void load() {
+	public final void load() {
 		Properties properties = new Properties();
 		FileReader fr = null;
 		IPath folder = Activator.getDefault().getStateLocation();
@@ -91,7 +104,6 @@ public class ChangeLogCache {
 			fr = new FileReader(file);
 			properties.load(fr);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
 			if (fr != null) {
@@ -115,7 +127,7 @@ public class ChangeLogCache {
 	/**
 	 * Persist the list of changelog files to storage.
 	 */
-	public void persist() {
+	public final void persist() {
 		IPath folder = Activator.getDefault().getStateLocation();
 		IPath location = folder.append(FILENAME);
 		File file = location.toFile();
@@ -141,6 +153,22 @@ public class ChangeLogCache {
 				}
 			}
 		}
+	}
+
+	/**
+	 * @param name
+	 *            The file name.
+	 * @return The matching workspace file.
+	 */
+	public final IFile getFile(final String name) {
+		IFile file = null;
+		for (IFile next : logs.keySet()) {
+			if (next.getName().equals(name)) {
+				file = next;
+				break;
+			}
+		}
+		return file;
 	}
 
 }
