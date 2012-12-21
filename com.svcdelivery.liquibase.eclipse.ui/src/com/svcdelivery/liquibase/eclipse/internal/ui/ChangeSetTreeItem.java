@@ -69,6 +69,9 @@ public class ChangeSetTreeItem {
 	public final void setChangeSet(final RanChangeSet ranChangeSet) {
 		changeSet = ranChangeSet;
 		// TODO Locate the file in the change log cache.
+		String name = changeSet.getChangeLog();
+		ChangeLogCache cache = Activator.getDefault().getChangeLogCache();
+		file = cache.getFile(name);
 	}
 
 	/**

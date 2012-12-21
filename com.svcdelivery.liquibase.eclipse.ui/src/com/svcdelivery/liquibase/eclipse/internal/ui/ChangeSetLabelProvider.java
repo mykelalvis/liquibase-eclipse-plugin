@@ -86,6 +86,13 @@ public class ChangeSetLabelProvider implements ITableLabelProvider {
 				if (changeLogFile != null) {
 					text = changeLogFile.getProjectRelativePath().toString();
 				}
+			} else if (column == 2) {
+				IFile changeLogFile = item.getChangeLogFile();
+				if (changeLogFile != null) {
+					text = "Located";
+				} else {
+					text = "Not found";
+				}
 			}
 		}
 		return text;
