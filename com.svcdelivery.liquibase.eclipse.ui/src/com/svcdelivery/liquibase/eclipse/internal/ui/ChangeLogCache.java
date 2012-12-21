@@ -100,17 +100,19 @@ public class ChangeLogCache {
 		IPath folder = Activator.getDefault().getStateLocation();
 		IPath location = folder.append(FILENAME);
 		File file = location.toFile();
-		try {
-			fr = new FileReader(file);
-			properties.load(fr);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (fr != null) {
-				try {
-					fr.close();
-				} catch (IOException e) {
-					e.printStackTrace();
+		if (file.exists()) {
+			try {
+				fr = new FileReader(file);
+				properties.load(fr);
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (fr != null) {
+					try {
+						fr.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
