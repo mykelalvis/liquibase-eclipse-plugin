@@ -159,9 +159,8 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 
 							@Override
 							public void run() {
-								if (items.size() == 0) {
-									viewer.setChildCount(parent, 0);
-								} else {
+								viewer.setChildCount(parent, items.size());
+								if (items.size() != 0) {
 									ChangeSetTreeItem element = items
 											.get(index);
 									viewer.replace(parent, index, element);
