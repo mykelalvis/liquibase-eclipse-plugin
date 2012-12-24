@@ -38,11 +38,11 @@ public class ConvertToLiquibaseCommandHandler implements IHandler {
 	/**
 	 * Builder ID.
 	 */
-	private static final String ID = "liquibase.ide.LiquibaseBuilder";
+	private static final String ID = "com.svcdelivery.liquibase.eclipse.LiquibaseBuilder";
 	/**
 	 * Liquibase Plugin Nature.
 	 */
-	private static final String NATURE = "liquibase.ide";
+	private static final String NATURE = "com.svcdelivery.liquibase.eclipse";
 
 	@Override
 	public void addHandlerListener(final IHandlerListener handlerListener) {

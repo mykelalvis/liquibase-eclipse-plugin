@@ -81,4 +81,20 @@ public class ChangeSetTreeItem {
 		return file;
 	}
 
+	@Override
+	public final int hashCode() {
+		return profile.hashCode() + changeSet.hashCode();
+	}
+
+	@Override
+	public final boolean equals(final Object other) {
+		boolean equal = false;
+		if (other instanceof ChangeSetTreeItem) {
+			ChangeSetTreeItem csti = (ChangeSetTreeItem) other;
+			equal = profile.equals(csti.profile)
+					&& changeSet.equals(csti.changeSet);
+		}
+		return equal;
+	}
+
 }
