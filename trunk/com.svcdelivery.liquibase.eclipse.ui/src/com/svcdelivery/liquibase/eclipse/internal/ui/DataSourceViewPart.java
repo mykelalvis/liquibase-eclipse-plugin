@@ -38,27 +38,32 @@ import org.eclipse.ui.part.ViewPart;
 /**
  * @author nick
  */
-public class DataSourceViewPart extends ViewPart {
+public class DataSourceViewPart extends ViewPart implements
+		DatabaseUpdateListener {
+	private TreeViewer dataSources;
 
 	@Override
 	public final void createPartControl(final Composite parent) {
-		final TreeViewer dataSources = new TreeViewer(parent, SWT.VIRTUAL
-				| SWT.FULL_SELECTION);
+		dataSources = new TreeViewer(parent, SWT.VIRTUAL | SWT.FULL_SELECTION);
 		final Tree dataSourcesTree = dataSources.getTree();
 		TreeViewerColumn log = new TreeViewerColumn(dataSources, SWT.NONE);
 		TreeViewerColumn id = new TreeViewerColumn(dataSources, SWT.NONE);
+		TreeViewerColumn tag = new TreeViewerColumn(dataSources, SWT.NONE);
 		TreeViewerColumn date = new TreeViewerColumn(dataSources, SWT.NONE);
 		TreeViewerColumn type = new TreeViewerColumn(dataSources, SWT.NONE);
 		TreeColumn logColumn = log.getColumn();
 		TreeColumn idColumn = id.getColumn();
+		TreeColumn tagColumn = tag.getColumn();
 		TreeColumn dateColumn = date.getColumn();
 		TreeColumn typeColumn = type.getColumn();
 		logColumn.setText("");
 		idColumn.setText("ID");
+		tagColumn.setText("Tag");
 		dateColumn.setText("Date Ran");
 		typeColumn.setText("Type");
 		logColumn.setWidth(300);
 		idColumn.setWidth(150);
+		tagColumn.setWidth(150);
 		dateColumn.setWidth(150);
 		typeColumn.setWidth(100);
 
@@ -99,10 +104,22 @@ public class DataSourceViewPart extends ViewPart {
 		dataSources.setContentProvider(new DataSourceContentProvider());
 		dataSources.setLabelProvider(new DataSourceLabelProvider());
 		dataSources.setInput(ProfileManager.getInstance());
+		Activator.getDefault().addDatabaseUpdateListener(this);
 	}
 
 	@Override
 	public void setFocus() {
+	}
+
+	@Override
+	public final void dispose() {
+		Activator.getDefault().removeDatabaseUpdateListener(this);
+		super.dispose();
+	}
+
+	@Override
+	public final void databaseUpdated(final DatabaseUpdateEvent event) {
+		dataSources.refresh(event.getElement());
 	}
 
 }

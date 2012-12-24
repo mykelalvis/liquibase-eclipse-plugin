@@ -102,8 +102,10 @@ public class DataSourceLabelProvider implements ITableLabelProvider {
 			} else if (columnIndex == 1) {
 				text = changeSet.getId();
 			} else if (columnIndex == 2) {
-				text = sdf.format(changeSet.getDateExecuted());
+				text = changeSet.getTag();
 			} else if (columnIndex == 3) {
+				text = sdf.format(changeSet.getDateExecuted());
+			} else if (columnIndex == 4) {
 				ExecType et = changeSet.getExecType();
 				text = et.toString();
 			}

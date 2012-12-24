@@ -104,10 +104,10 @@ public class RollbackChangeSetWizard extends Wizard {
 						try {
 							final DatabaseConnection database = new JdbcConnection(
 									connection);
-							final Liquibase lb = new Liquibase(changeLogFile
-									.getProjectRelativePath().toString(),
-									resourceAccessor, database);
-							lb.rollback((String) null, null);
+							final Liquibase lb = new Liquibase(
+									changeLogFile.getName(), resourceAccessor,
+									database);
+							lb.rollback(1, null);
 							ut.commit();
 							result.setStatus(LiquibaseResultStatus.SUCCESS);
 						} catch (final LiquibaseException e) {
@@ -125,6 +125,9 @@ public class RollbackChangeSetWizard extends Wizard {
 							e.printStackTrace();
 						}
 					}
+					// Notify change to database.
+					DatabaseUpdateEvent event = new DatabaseUpdateEvent(item);
+					Activator.getDefault().notifyDatabaseUpdateListeners(event);
 				} else {
 					System.out.println("Failed to get connection.");
 					result.setStatus(LiquibaseResultStatus.FAILURE);

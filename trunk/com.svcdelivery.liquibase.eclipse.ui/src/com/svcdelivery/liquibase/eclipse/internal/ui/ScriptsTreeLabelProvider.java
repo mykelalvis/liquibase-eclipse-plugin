@@ -16,8 +16,6 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.io.File;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -63,8 +61,11 @@ public class ScriptsTreeLabelProvider implements ITableLabelProvider {
 		if (element instanceof IFile) {
 			final IFile log = (IFile) element;
 			if (columnIndex == 0) {
-				text = log.getProject() + File.separator
-						+ log.getProjectRelativePath().toOSString();
+				text = log.getName();
+			} else if (columnIndex == 1) {
+				text = log.getProject().getName();
+			} else if (columnIndex == 2) {
+				text = log.getParent().getProjectRelativePath().toOSString();
 			}
 		}
 		return text;

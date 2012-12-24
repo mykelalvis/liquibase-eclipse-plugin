@@ -42,7 +42,13 @@ public class ScriptsViewPart extends ViewPart {
 		final Tree scriptsTree = scripts.getTree();
 		final TreeColumn nameColumn = new TreeColumn(scriptsTree, SWT.NONE);
 		nameColumn.setText("Name");
-		nameColumn.setWidth(200);
+		nameColumn.setWidth(300);
+		final TreeColumn projectColumn = new TreeColumn(scriptsTree, SWT.NONE);
+		projectColumn.setText("Project");
+		projectColumn.setWidth(150);
+		final TreeColumn pathColumn = new TreeColumn(scriptsTree, SWT.NONE);
+		pathColumn.setText("Path");
+		pathColumn.setWidth(350);
 		final ChangeLogCache changeLogCache = Activator.getDefault()
 				.getChangeLogCache();
 		scripts.setContentProvider(new ScriptsTreeContentProvider());

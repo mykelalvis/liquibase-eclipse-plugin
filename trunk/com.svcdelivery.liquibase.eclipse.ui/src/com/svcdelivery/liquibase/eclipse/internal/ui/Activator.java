@@ -16,6 +16,9 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -47,6 +50,11 @@ public class Activator extends AbstractUIPlugin {
 	private ChangeLogCache changeLogCache;
 
 	/**
+	 * A set of database update listeners.
+	 */
+	private Set<DatabaseUpdateListener> databaseUpdateListeners;
+
+	/**
 	 * @param context
 	 *            The bundle context.
 	 * @throws Exception
@@ -58,6 +66,7 @@ public class Activator extends AbstractUIPlugin {
 	public final void start(final BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		databaseUpdateListeners = new HashSet<DatabaseUpdateListener>();
 		changeLogCache = new ChangeLogCache();
 		results = new LiquibaseResults();
 		for (final LiquibaseResultStatus status : LiquibaseResultStatus
@@ -127,4 +136,34 @@ public class Activator extends AbstractUIPlugin {
 		return plugin.getImageRegistry().get(name);
 	}
 
+	/**
+	 * @param listener
+	 *            The listener to add.
+	 */
+	public final void addDatabaseUpdateListener(
+			final DatabaseUpdateListener listener) {
+		databaseUpdateListeners.add(listener);
+	}
+
+	/**
+	 * @param listener
+	 *            The listener to remove.
+	 */
+	public final void removeDatabaseUpdateListener(
+			final DatabaseUpdateListener listener) {
+		databaseUpdateListeners.remove(listener);
+	}
+
+	/**
+	 * Notify listeners of updates to a database.
+	 * 
+	 * @param event
+	 *            The event.
+	 */
+	public final void notifyDatabaseUpdateListeners(
+			final DatabaseUpdateEvent event) {
+		for (DatabaseUpdateListener listener : databaseUpdateListeners) {
+			listener.databaseUpdated(event);
+		}
+	}
 }
