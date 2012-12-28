@@ -47,6 +47,11 @@ public class ChangeSetTable extends Composite {
 	private List<ChangeSetTreeItem> items;
 
 	/**
+	 * Selected item.
+	 */
+	private ChangeSetTreeItem selected;
+
+	/**
 	 * True if all entries complete.
 	 */
 	private boolean complete;
@@ -90,9 +95,10 @@ public class ChangeSetTable extends Composite {
 	 * @param input
 	 *            The input object.
 	 */
-	public final void setInput(final List<ChangeSetTreeItem> input) {
+	public final void setInput(final ChangeSetTreeItem input) {
+		selected = input;
+		// FIXME get list of all change sets to roll back.
 		tv.setInput(input);
-		items = input;
 		checkComplete();
 	}
 
