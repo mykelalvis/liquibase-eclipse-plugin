@@ -94,16 +94,13 @@ public class RollbackCommandHandler extends Action implements IHandler {
 
 	@Override
 	public final void run() {
-		final List<ChangeSetTreeItem> items = new ArrayList<ChangeSetTreeItem>();
+		ChangeSetTreeItem item = null;
 		if (selection instanceof StructuredSelection) {
 			final StructuredSelection structured = (StructuredSelection) selection;
-			for (final Object next : structured.toList()) {
-				if (next instanceof ChangeSetTreeItem) {
-					items.add((ChangeSetTreeItem) next);
-				}
-			}
+			if (structured.size() == 1)
+				item = (ChangeSetTreeItem) structured.getFirstElement();
 		}
-		IWizard targetWizard = new RollbackChangeSetWizard(items);
+		IWizard targetWizard = new RollbackChangeSetWizard(item);
 		showWizard(targetWizard);
 	}
 

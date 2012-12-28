@@ -45,7 +45,7 @@ public class RollbackChangeSetWizard extends Wizard {
 	/**
 	 * The list of files to attempt to roll back.
 	 */
-	private List<ChangeSetTreeItem> items;
+	private ChangeSetTreeItem item;
 
 	/**
 	 * Page showing currently installed scripts.
@@ -53,16 +53,16 @@ public class RollbackChangeSetWizard extends Wizard {
 	private RollbackSummaryPage rollbackPage;
 
 	/**
-	 * @param changeSets
+	 * @param changeSet
 	 *            A list of selected script files.
 	 */
-	public RollbackChangeSetWizard(final List<ChangeSetTreeItem> changeSets) {
-		items = changeSets;
+	public RollbackChangeSetWizard(final ChangeSetTreeItem changeSet) {
+		item = changeSet;
 	}
 
 	@Override
 	public final void addPages() {
-		rollbackPage = new RollbackSummaryPage(items);
+		rollbackPage = new RollbackSummaryPage(item);
 		addPage(rollbackPage);
 	}
 
@@ -73,18 +73,16 @@ public class RollbackChangeSetWizard extends Wizard {
 
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
-				monitor.beginTask("rollback", items.size());
-				for (final ChangeSetTreeItem item : items) {
-					if (!monitor.isCanceled()) {
-						runScript(item);
-					}
-					monitor.worked(1);
+				monitor.beginTask("rollback", 1);
+				if (!monitor.isCanceled()) {
+					runScript();
 				}
+				monitor.worked(1);
 				monitor.done();
 				return Status.OK_STATUS;
 			}
 
-			private void runScript(final ChangeSetTreeItem item) {
+			private void runScript() {
 				final LiquibaseResult result = new LiquibaseResult();
 				result.setStatus(LiquibaseResultStatus.RUNNING);
 				result.setTimestamp(System.currentTimeMillis());
