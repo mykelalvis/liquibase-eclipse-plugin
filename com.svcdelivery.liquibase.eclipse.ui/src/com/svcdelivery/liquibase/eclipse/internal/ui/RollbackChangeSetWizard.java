@@ -73,9 +73,16 @@ public class RollbackChangeSetWizard extends Wizard {
 
 			@Override
 			protected IStatus run(final IProgressMonitor monitor) {
-				monitor.beginTask("rollback", 1);
+				List<ChangeSetTreeItem> rollbackList = rollbackPage
+						.getRollbackList();
+				monitor.beginTask("rollback", rollbackList.size());
 				if (!monitor.isCanceled()) {
-					runScript();
+					// FIXME group items into files.
+					// work out change set counts to roll back.
+					// call rollback for all files.
+					for (ChangeSetTreeItem rollback : rollbackList) {
+						//runScript(rollback);
+					}
 				}
 				monitor.worked(1);
 				monitor.done();
