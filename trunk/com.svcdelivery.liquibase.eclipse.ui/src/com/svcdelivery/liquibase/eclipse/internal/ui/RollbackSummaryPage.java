@@ -16,10 +16,13 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import java.util.List;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 
 /**
  * @author nick
@@ -30,6 +33,7 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	 * Change set items.
 	 */
 	private ChangeSetTreeItem item;
+	private ChangeSetTable cst;
 
 	/**
 	 * Constructor.
@@ -55,7 +59,7 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	public final void createControl(final Composite parent) {
 		final Composite root = new Composite(parent, SWT.NONE);
 		root.setLayout(new FillLayout());
-		ChangeSetTable cst = new ChangeSetTable(root, SWT.NONE);
+		cst = new ChangeSetTable(root, SWT.NONE);
 		cst.addCompletelistener(this);
 		cst.setInput(item);
 		setControl(root);
@@ -63,7 +67,17 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 
 	@Override
 	public final void complete(final boolean isComplete) {
-		setPageComplete(isComplete);
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				setPageComplete(isComplete);
+			}
+		});
+	}
+
+	public List<ChangeSetTreeItem> getRollbackList() {
+		return cst.getRollbackList();
 	}
 
 }

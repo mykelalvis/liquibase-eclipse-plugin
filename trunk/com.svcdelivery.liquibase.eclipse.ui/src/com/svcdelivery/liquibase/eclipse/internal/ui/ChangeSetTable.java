@@ -19,11 +19,14 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 import java.util.ArrayList;
 import java.util.List;
 
+import liquibase.changelog.RanChangeSet;
+
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
 
 /**
@@ -97,9 +100,36 @@ public class ChangeSetTable extends Composite {
 	 */
 	public final void setInput(final ChangeSetTreeItem input) {
 		selected = input;
-		// FIXME get list of all change sets to roll back.
-		tv.setInput(input);
-		checkComplete();
+		LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
+
+			@Override
+			public void complete(List<RanChangeSet> ranChangeSets) {
+				RanChangeSet toRollback = selected.getChangeSet();
+				int index = ranChangeSets.indexOf(toRollback);
+				if (index != -1) {
+					final List<RanChangeSet> rollbackList = ranChangeSets
+							.subList(index, ranChangeSets.size());
+					items = new ArrayList<ChangeSetTreeItem>(
+							rollbackList.size());
+					for (RanChangeSet set : rollbackList) {
+						ChangeSetTreeItem item = new ChangeSetTreeItem();
+						item.setChangeSet(set);
+						item.setProfile(selected.getProfile());
+						items.add(item);
+					}
+					Display.getDefault().syncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							tv.setInput(items);
+						}
+					});
+					checkComplete();
+				}
+			}
+
+		};
+		loader.loadScripts(selected.getProfile());
 	}
 
 	/**
@@ -140,5 +170,9 @@ public class ChangeSetTable extends Composite {
 	public final void addCompletelistener(final CompleteListener listener) {
 		listeners.add(listener);
 		notifyListener(listener);
+	}
+
+	public List<ChangeSetTreeItem> getRollbackList() {
+		return items;
 	}
 }
