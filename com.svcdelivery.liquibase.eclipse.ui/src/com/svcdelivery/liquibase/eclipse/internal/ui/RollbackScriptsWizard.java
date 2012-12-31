@@ -56,7 +56,7 @@ public class RollbackScriptsWizard extends Wizard {
 	/**
 	 * Page showing currently installed scripts.
 	 */
-	private InstalledScriptsPage scriptsPage;
+	private RollbackSummaryPage rollbackPage;
 
 	/**
 	 * @param scriptFiles
@@ -69,9 +69,10 @@ public class RollbackScriptsWizard extends Wizard {
 	@Override
 	public final void addPages() {
 		dataSourcePage = new DataSourcePage(SWT.NONE);
-		scriptsPage = new InstalledScriptsPage(dataSourcePage);
+		rollbackPage = new RollbackSummaryPage();
+		dataSourcePage.addPageCompleteListener(rollbackPage);
 		addPage(dataSourcePage);
-		addPage(scriptsPage);
+		addPage(rollbackPage);
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class RollbackScriptsWizard extends Wizard {
 		boolean ok = true;
 		final IConnectionProfile profile = dataSourcePage.getProfile();
 		if (profile != null) {
-			final Job job = new Job("Rollback Liquibase Script") {
+			final Job job = new Job("Rollback Liquibase Change Sets") {
 
 				@Override
 				protected IStatus run(final IProgressMonitor monitor) {

@@ -29,6 +29,7 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.TreeViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
@@ -119,7 +120,13 @@ public class DataSourceViewPart extends ViewPart implements
 
 	@Override
 	public final void databaseUpdated(final DatabaseUpdateEvent event) {
-		dataSources.refresh(event.getElement());
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				dataSources.refresh(event.getElement());
+			}
+		});
 	}
 
 }
