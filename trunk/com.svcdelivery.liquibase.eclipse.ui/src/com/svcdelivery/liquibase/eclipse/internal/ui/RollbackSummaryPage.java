@@ -20,6 +20,7 @@ import java.util.List;
 
 import liquibase.changelog.RanChangeSet;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
@@ -43,9 +44,14 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	private ChangeSetTable cst;
 
 	/**
+	 * The files to roll back.
+	 */
+	private IFile file;
+	
+	/**
 	 * Constructor to allow change set item to be set later.
 	 */
-	protected RollbackSummaryPage() {
+	private RollbackSummaryPage() {
 		super("Rollback Summary");
 		setTitle("Rollback Summary");
 		setMessage("Click Finish to apply the rollbacks.");
@@ -61,6 +67,17 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	protected RollbackSummaryPage(final ChangeSetTreeItem changeSetItem) {
 		this();
 		item = changeSetItem;
+	}
+
+	/**
+	 * Constructor for a known change set item.
+	 * 
+	 * @param file
+	 *            The file to roll back.
+	 */
+	protected RollbackSummaryPage(final IFile rollbackFile) {
+		this();
+		file = rollbackFile;
 	}
 
 	/**
