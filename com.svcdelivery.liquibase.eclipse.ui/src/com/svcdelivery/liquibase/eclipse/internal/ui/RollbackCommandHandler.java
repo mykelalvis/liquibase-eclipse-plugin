@@ -16,9 +16,6 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
@@ -78,16 +75,14 @@ public class RollbackCommandHandler extends Action implements IHandler {
 			throws ExecutionException {
 		selection = HandlerUtil.getCurrentSelection(event);
 		shell = HandlerUtil.getActiveShell(event);
-		final List<IFile> files = new ArrayList<IFile>();
+		IFile file = null;
 		if (selection instanceof StructuredSelection) {
 			final StructuredSelection structured = (StructuredSelection) selection;
-			for (final Object next : structured.toList()) {
-				if (next instanceof IFile) {
-					files.add((IFile) next);
-				}
+			if (structured.size() == 1) {
+				file = (IFile) structured.getFirstElement();
 			}
 		}
-		IWizard targetWizard = new RollbackScriptsWizard(files);
+		IWizard targetWizard = new RollbackScriptsWizard(file);
 		showWizard(targetWizard);
 		return null;
 	}

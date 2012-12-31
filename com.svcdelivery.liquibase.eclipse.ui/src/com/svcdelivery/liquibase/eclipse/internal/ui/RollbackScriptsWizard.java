@@ -44,9 +44,9 @@ import com.arjuna.ats.jta.UserTransaction;
 public class RollbackScriptsWizard extends Wizard {
 
 	/**
-	 * The list of files to attempt to roll back.
+	 * The file to attempt to roll back.
 	 */
-	private final List<IFile> files;
+	private final IFile file;
 
 	/**
 	 * Data source selection page.
@@ -59,17 +59,17 @@ public class RollbackScriptsWizard extends Wizard {
 	private RollbackSummaryPage rollbackPage;
 
 	/**
-	 * @param scriptFiles
-	 *            A list of selected script files.
+	 * @param scriptFile
+	 *            The selected script file.
 	 */
-	public RollbackScriptsWizard(final List<IFile> scriptFiles) {
-		files = scriptFiles;
+	public RollbackScriptsWizard(final IFile scriptFile) {
+		file = scriptFile;
 	}
 
 	@Override
 	public final void addPages() {
 		dataSourcePage = new DataSourcePage(SWT.NONE);
-		rollbackPage = new RollbackSummaryPage();
+		rollbackPage = new RollbackSummaryPage(file);
 		dataSourcePage.addPageCompleteListener(rollbackPage);
 		addPage(dataSourcePage);
 		addPage(rollbackPage);
@@ -78,74 +78,90 @@ public class RollbackScriptsWizard extends Wizard {
 	@Override
 	public final boolean performFinish() {
 		boolean ok = true;
-		final IConnectionProfile profile = dataSourcePage.getProfile();
-		if (profile != null) {
-			final Job job = new Job("Rollback Liquibase Change Sets") {
+		final Job job = new Job("Rollback Liquibase Script") {
 
-				@Override
-				protected IStatus run(final IProgressMonitor monitor) {
-					monitor.beginTask("rollback", files.size());
-					for (final IFile file : files) {
-						if (!monitor.isCanceled()) {
-							runScript(file);
+			@Override
+			protected IStatus run(final IProgressMonitor monitor) {
+				List<ChangeSetTreeItem> rollbackList = rollbackPage
+						.getRollbackList();
+				monitor.beginTask("rollback", rollbackList.size());
+				if (!monitor.isCanceled()) {
+					String filename = null;
+					IFile file = null;
+					int count = 0;
+					for (ChangeSetTreeItem rollback : rollbackList) {
+						file = rollback.getChangeLogFile();
+						String itemName = file.getName();
+						if (filename == null) {
+							filename = itemName;
+							count++;
+						} else if (!filename.equals(itemName)) {
+							runScript(file, count);
+							count = 0;
+							filename = null;
+						} else {
+							count++;
 						}
 						monitor.worked(1);
 					}
-					monitor.done();
-					return Status.OK_STATUS;
+					runScript(file, count);
 				}
+				monitor.done();
+				return Status.OK_STATUS;
+			}
 
-				private void runScript(final IFile file) {
-					final LiquibaseResult result = new LiquibaseResult();
-					result.setStatus(LiquibaseResultStatus.RUNNING);
-					result.setTimestamp(System.currentTimeMillis());
-					result.setScript(file.getName());
-					Activator.getDefault().getResults().add(result);
-					final String changeLogFile = file.getLocation().toString();
-					final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-							file.getParent().getLocation().toString());
-					final Connection connection = ConnectionUtil
-							.getConnection(profile);
-					if (connection != null) {
+			private void runScript(final IFile changeLogFile, final int count) {
+				final LiquibaseResult result = new LiquibaseResult();
+				result.setStatus(LiquibaseResultStatus.RUNNING);
+				result.setTimestamp(System.currentTimeMillis());
+				result.setScript(changeLogFile.getName());
+				Activator.getDefault().getResults().add(result);
+				final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
+						changeLogFile.getParent().getLocation().toString());
+				IConnectionProfile profile = dataSourcePage.getProfile();
+				final Connection connection = ConnectionUtil
+						.getConnection(profile);
+				if (connection != null) {
+					try {
+						final javax.transaction.UserTransaction ut = UserTransaction
+								.userTransaction();
+						ut.begin();
 						try {
-							final javax.transaction.UserTransaction ut = UserTransaction
-									.userTransaction();
-							ut.begin();
-							try {
-								final DatabaseConnection database = new JdbcConnection(
-										connection);
-								final Liquibase lb = new Liquibase(
-										changeLogFile, resourceAccessor,
-										database);
-								lb.rollback((String) null, null);
-								ut.commit();
-								result.setStatus(LiquibaseResultStatus.SUCCESS);
-							} catch (final LiquibaseException e) {
-								e.printStackTrace();
-								ut.rollback();
-								result.setStatus(LiquibaseResultStatus.FAILURE);
-							}
-						} catch (final Exception e) {
+							final DatabaseConnection database = new JdbcConnection(
+									connection);
+							final Liquibase lb = new Liquibase(
+									changeLogFile.getName(), resourceAccessor,
+									database);
+							lb.rollback(count, null);
+							ut.commit();
+							result.setStatus(LiquibaseResultStatus.SUCCESS);
+						} catch (final LiquibaseException e) {
 							e.printStackTrace();
+							ut.rollback();
 							result.setStatus(LiquibaseResultStatus.FAILURE);
-						} finally {
-							try {
-								connection.close();
-							} catch (final SQLException e) {
-								e.printStackTrace();
-							}
 						}
-					} else {
-						System.out.println("Failed to get connection.");
+					} catch (final Exception e) {
+						e.printStackTrace();
 						result.setStatus(LiquibaseResultStatus.FAILURE);
+					} finally {
+						try {
+							connection.close();
+						} catch (final SQLException e) {
+							e.printStackTrace();
+						}
 					}
+					// Notify change to database.
+					DatabaseUpdateEvent event = new DatabaseUpdateEvent(item);
+					Activator.getDefault().notifyDatabaseUpdateListeners(event);
+				} else {
+					System.out.println("Failed to get connection.");
+					result.setStatus(LiquibaseResultStatus.FAILURE);
 				}
+			}
 
-			};
-			job.schedule();
-		} else {
-			ok = false;
-		}
+		};
+		job.schedule();
 		return ok;
 	}
+
 }
