@@ -151,7 +151,8 @@ public class RollbackScriptsWizard extends Wizard {
 						}
 					}
 					// Notify change to database.
-					DatabaseUpdateEvent event = new DatabaseUpdateEvent(item);
+					DatabaseUpdateEvent event = new DatabaseUpdateEvent(
+							dataSourcePage.getProfile());
 					Activator.getDefault().notifyDatabaseUpdateListeners(event);
 				} else {
 					System.out.println("Failed to get connection.");
