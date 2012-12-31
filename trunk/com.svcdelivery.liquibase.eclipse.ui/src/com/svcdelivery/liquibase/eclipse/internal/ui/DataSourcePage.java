@@ -62,7 +62,7 @@ public class DataSourcePage extends WizardPage {
 	/**
 	 * Constructor.
 	 */
-	protected DataSourcePage(int style) {
+	protected DataSourcePage(final int style) {
 		super("Data Source");
 		this.style = style;
 		setTitle("Data Source");
@@ -140,7 +140,7 @@ public class DataSourcePage extends WizardPage {
 				@Override
 				public void run() {
 					for (final CompleteListener listener : listeners) {
-						listener.complete(true);
+						listener.complete(true, getProfile());
 					}
 				}
 			});

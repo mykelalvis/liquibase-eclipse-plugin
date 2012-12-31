@@ -77,25 +77,36 @@ public class RollbackChangeSetWizard extends Wizard {
 						.getRollbackList();
 				monitor.beginTask("rollback", rollbackList.size());
 				if (!monitor.isCanceled()) {
-					// FIXME group items into files.
-					// work out change set counts to roll back.
-					// call rollback for all files.
+					String filename = null;
+					IFile file = null;
+					int count = 0;
 					for (ChangeSetTreeItem rollback : rollbackList) {
-						//runScript(rollback);
+						file = rollback.getChangeLogFile();
+						String itemName = file.getName();
+						if (filename == null) {
+							filename = itemName;
+							count++;
+						} else if (!filename.equals(itemName)) {
+							runScript(file, count);
+							count = 0;
+							filename = null;
+						} else {
+							count++;
+						}
+						monitor.worked(1);
 					}
+					runScript(file, count);
 				}
-				monitor.worked(1);
 				monitor.done();
 				return Status.OK_STATUS;
 			}
 
-			private void runScript() {
+			private void runScript(final IFile changeLogFile, final int count) {
 				final LiquibaseResult result = new LiquibaseResult();
 				result.setStatus(LiquibaseResultStatus.RUNNING);
 				result.setTimestamp(System.currentTimeMillis());
-				result.setScript(item.getChangeSet().getChangeLog());
+				result.setScript(changeLogFile.getName());
 				Activator.getDefault().getResults().add(result);
-				final IFile changeLogFile = item.getChangeLogFile();
 				final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
 						changeLogFile.getParent().getLocation().toString());
 				IConnectionProfile profile = item.getProfile();
@@ -112,7 +123,7 @@ public class RollbackChangeSetWizard extends Wizard {
 							final Liquibase lb = new Liquibase(
 									changeLogFile.getName(), resourceAccessor,
 									database);
-							lb.rollback(1, null);
+							lb.rollback(count, null);
 							ut.commit();
 							result.setStatus(LiquibaseResultStatus.SUCCESS);
 						} catch (final LiquibaseException e) {

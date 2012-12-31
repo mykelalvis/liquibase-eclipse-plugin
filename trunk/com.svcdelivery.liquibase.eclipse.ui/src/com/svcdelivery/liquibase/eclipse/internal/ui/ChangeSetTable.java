@@ -160,7 +160,7 @@ public class ChangeSetTable extends Composite {
 	 *            The listener to notify.
 	 */
 	private void notifyListener(final CompleteListener listener) {
-		listener.complete(complete);
+		listener.complete(complete, selected);
 	}
 
 	/**

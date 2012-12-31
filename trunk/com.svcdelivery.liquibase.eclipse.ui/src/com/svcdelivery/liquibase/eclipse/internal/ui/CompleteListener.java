@@ -25,6 +25,8 @@ public interface CompleteListener {
 	 * 
 	 * @param isComplete
 	 *            true if complete.
+	 * @param item
+	 *            The item that is ready, or null.
 	 */
-	void complete(boolean isComplete);
+	void complete(boolean isComplete, Object item);
 }

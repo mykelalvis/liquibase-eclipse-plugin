@@ -18,6 +18,9 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.util.List;
 
+import liquibase.changelog.RanChangeSet;
+
+import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
@@ -33,20 +36,31 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	 * Change set items.
 	 */
 	private ChangeSetTreeItem item;
+
+	/**
+	 * Change Set table.
+	 */
 	private ChangeSetTable cst;
 
 	/**
-	 * Constructor.
+	 * Constructor to allow change set item to be set later.
+	 */
+	protected RollbackSummaryPage() {
+		super("Rollback Summary");
+		setTitle("Rollback Summary");
+		setMessage("Click Finish to apply the rollbacks.");
+		setPageComplete(false);
+	}
+
+	/**
+	 * Constructor for a known change set item.
 	 * 
 	 * @param changeSetItem
 	 *            Change set items.
 	 */
 	protected RollbackSummaryPage(final ChangeSetTreeItem changeSetItem) {
-		super("Rollback Summary");
-		setTitle("Rollback Summary");
-		setMessage("Click Finish to apply the rollbacks.");
+		this();
 		item = changeSetItem;
-		setPageComplete(false);
 	}
 
 	/**
@@ -61,22 +75,49 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 		root.setLayout(new FillLayout());
 		cst = new ChangeSetTable(root, SWT.NONE);
 		cst.addCompletelistener(this);
-		cst.setInput(item);
+		if (item != null) {
+			cst.setInput(item);
+		}
 		setControl(root);
 	}
 
 	@Override
-	public final void complete(final boolean isComplete) {
-		Display.getDefault().asyncExec(new Runnable() {
+	public final void complete(final boolean isComplete,
+			final Object changeSetItem) {
+		if (changeSetItem instanceof IConnectionProfile) {
+			final IConnectionProfile profile = (IConnectionProfile) changeSetItem;
+			LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
-			@Override
-			public void run() {
-				setPageComplete(isComplete);
-			}
-		});
+				@Override
+				public void complete(final List<RanChangeSet> ranChangeSets) {
+					if (ranChangeSets.size() != 0) {
+						item = new ChangeSetTreeItem();
+						item.setProfile(profile);
+						item.setChangeSet(ranChangeSets.get(0));
+						if (cst != null) {
+							cst.setInput(item);
+						}
+					} else {
+						// Show error, no change sets found.
+					}
+				}
+			};
+			loader.loadScripts(profile);
+		} else if (changeSetItem instanceof ChangeSetTreeItem) {
+			Display.getDefault().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					setPageComplete(isComplete);
+				}
+			});
+		}
 	}
 
-	public List<ChangeSetTreeItem> getRollbackList() {
+	/**
+	 * @return The list of items to roll back.
+	 */
+	public final List<ChangeSetTreeItem> getRollbackList() {
 		return cst.getRollbackList();
 	}
 
