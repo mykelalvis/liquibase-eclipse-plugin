@@ -223,7 +223,7 @@
          <uri
                id="databaseChangeLog"
                name="http://www.liquibase.org/xml/ns/dbchangelog"
-               uri="resources/dbchangelog-2.1.xsd">
+               uri="platform:/resources/dbchangelog-2.1.xsd">
          </uri>
       </catalogContribution>
    </extension>
