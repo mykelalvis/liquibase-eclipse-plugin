@@ -47,7 +47,7 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	 * The files to roll back.
 	 */
 	private IFile file;
-	
+
 	/**
 	 * Constructor to allow change set item to be set later.
 	 */
@@ -101,18 +101,28 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	@Override
 	public final void complete(final boolean isComplete,
 			final Object changeSetItem) {
-		if (changeSetItem instanceof IConnectionProfile) {
+		if (changeSetItem instanceof IConnectionProfile && file != null) {
 			final IConnectionProfile profile = (IConnectionProfile) changeSetItem;
 			LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
 				@Override
 				public void complete(final List<RanChangeSet> ranChangeSets) {
 					if (ranChangeSets.size() != 0) {
-						item = new ChangeSetTreeItem();
-						item.setProfile(profile);
-						item.setChangeSet(ranChangeSets.get(0));
-						if (cst != null) {
-							cst.setInput(item);
+						RanChangeSet set = null;
+						String filename = file.getName();
+						for (RanChangeSet next : ranChangeSets) {
+							if (filename.equals(next.getChangeLog())) {
+								set = next;
+								break;
+							}
+						}
+						if (set != null) {
+							item = new ChangeSetTreeItem();
+							item.setProfile(profile);
+							item.setChangeSet(set);
+							if (cst != null) {
+								cst.setInput(item);
+							}
 						}
 					} else {
 						// Show error, no change sets found.
