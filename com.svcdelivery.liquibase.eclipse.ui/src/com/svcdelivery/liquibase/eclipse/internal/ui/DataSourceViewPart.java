@@ -18,6 +18,7 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.util.Iterator;
 
+import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.datatools.connectivity.ProfileManager;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -77,18 +78,28 @@ public class DataSourceViewPart extends ViewPart implements
 				ISelection selection = dataSources.getSelection();
 				if (selection instanceof StructuredSelection) {
 					StructuredSelection ss = (StructuredSelection) selection;
-					boolean ok = true;
+					boolean rollback = true;
+					boolean refresh = true;
 					Iterator<?> i = ss.iterator();
 					while (i.hasNext()) {
 						Object next = i.next();
 						if (!(next instanceof ChangeSetTreeItem)) {
-							ok = false;
+							rollback = false;
+							break;
+						}
+						if (!(next instanceof IConnectionProfile)) {
+							rollback = false;
 							break;
 						}
 					}
-					if (ok) {
+					if (rollback) {
 						Shell shell = dataSourcesTree.getShell();
 						IAction action = new RollbackCommandHandler(shell,
+								selection);
+						manager.add(action);
+					}
+					if (refresh) {
+						IAction action = new DataSourceRefreshCommandHandler(
 								selection);
 						manager.add(action);
 					}
