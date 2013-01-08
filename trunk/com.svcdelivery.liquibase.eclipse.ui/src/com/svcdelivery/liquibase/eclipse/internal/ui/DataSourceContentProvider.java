@@ -140,13 +140,16 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 					Object element = changeSets.keySet().toArray()[index];
 					viewer.replace(parent, index, element);
 					if (element instanceof IConnectionProfile) {
+						changeSets.remove(element);
+						Object[] children = viewer.getExpandedElements();
+						viewer.remove(element, children);
 						viewer.setHasChildren(element, true);
 					}
 				}
 			});
 		} else if (parent instanceof IConnectionProfile) {
 			final IConnectionProfile profile = (IConnectionProfile) parent;
-			final List<ChangeSetTreeItem> ran = changeSets.get(profile);
+			final List<ChangeSetTreeItem> ran = null;
 			if (ran == null) {
 				LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
@@ -160,13 +163,15 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 							@Override
 							public void run() {
 								viewer.setChildCount(parent, items.size());
-								if (items.size() != 0) {
+								if (items.size() >index) {
 									ChangeSetTreeItem element = items
 											.get(index);
 									viewer.replace(parent, index, element);
 									if (element instanceof IConnectionProfile) {
 										viewer.setHasChildren(element, true);
 									}
+								} else if (items.size() != 0) {
+									
 								}
 							}
 						});

@@ -129,6 +129,10 @@ public class UpdateScriptsWizard extends Wizard {
 									e.printStackTrace();
 								}
 							}
+							DatabaseUpdateEvent event = new DatabaseUpdateEvent(
+									profile);
+							Activator.getDefault()
+									.notifyDatabaseUpdateListeners(event);
 						} else {
 							System.out.println("Failed to get connection.");
 							result.setStatus(LiquibaseResultStatus.FAILURE);
