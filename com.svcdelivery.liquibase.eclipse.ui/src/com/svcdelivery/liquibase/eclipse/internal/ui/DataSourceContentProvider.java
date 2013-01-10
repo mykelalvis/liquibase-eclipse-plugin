@@ -19,6 +19,7 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 import liquibase.changelog.RanChangeSet;
@@ -137,56 +138,48 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 
 				@Override
 				public void run() {
-					Object element = changeSets.keySet().toArray()[index];
-					viewer.replace(parent, index, element);
-					if (element instanceof IConnectionProfile) {
-						changeSets.remove(element);
-						Object[] children = viewer.getExpandedElements();
-						viewer.remove(element, children);
-						viewer.setHasChildren(element, true);
+					Set<IConnectionProfile> keySet = changeSets.keySet();
+					if (keySet.size() > index) {
+						Object element = keySet.toArray()[index];
+						viewer.replace(parent, index, element);
+						if (element instanceof IConnectionProfile) {
+							changeSets.remove(element);
+							Object[] children = viewer.getExpandedElements();
+							viewer.remove(element, children);
+							viewer.setHasChildren(element, true);
+						}
+					} else {
+						// FIXME gets here whilst adding multiple scripts.
 					}
 				}
 			});
 		} else if (parent instanceof IConnectionProfile) {
 			final IConnectionProfile profile = (IConnectionProfile) parent;
-			final List<ChangeSetTreeItem> ran = null;
-			if (ran == null) {
-				LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
-
-					@Override
-					public void complete(final List<RanChangeSet> ranChangeSets) {
-						final List<ChangeSetTreeItem> items = wrap(profile,
-								ranChangeSets);
-						changeSets.put(profile, items);
-						Display.getDefault().asyncExec(new Runnable() {
-
-							@Override
-							public void run() {
-								viewer.setChildCount(parent, items.size());
-								if (items.size() >index) {
-									ChangeSetTreeItem element = items
-											.get(index);
-									viewer.replace(parent, index, element);
-									if (element instanceof IConnectionProfile) {
-										viewer.setHasChildren(element, true);
-									}
-								} else if (items.size() != 0) {
-									
-								}
-							}
-						});
-					}
-				};
-				loader.loadScripts(profile);
-				return;
-			}
-			Display.getDefault().asyncExec(new Runnable() {
+			LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
 				@Override
-				public void run() {
-					viewer.replace(parent, index, ran.get(index));
+				public void complete(final List<RanChangeSet> ranChangeSets) {
+					final List<ChangeSetTreeItem> items = wrap(profile,
+							ranChangeSets);
+					changeSets.put(profile, items);
+					Display.getDefault().asyncExec(new Runnable() {
+
+						@Override
+						public void run() {
+							viewer.setChildCount(parent, items.size());
+							if (items.size() > index) {
+								ChangeSetTreeItem element = items.get(index);
+								viewer.replace(parent, index, element);
+								if (element instanceof IConnectionProfile) {
+									viewer.setHasChildren(element, true);
+								}
+							}
+						}
+					});
 				}
-			});
+			};
+			loader.loadScripts(profile);
+			return;
 		}
 	}
 
