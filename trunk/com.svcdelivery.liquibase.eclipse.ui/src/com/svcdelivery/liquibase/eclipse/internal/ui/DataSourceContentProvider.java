@@ -143,13 +143,11 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 						Object element = keySet.toArray()[index];
 						viewer.replace(parent, index, element);
 						if (element instanceof IConnectionProfile) {
-							changeSets.remove(element);
 							Object[] children = viewer.getExpandedElements();
+							viewer.setExpandedState(element, false);
 							viewer.remove(element, children);
 							viewer.setHasChildren(element, true);
 						}
-					} else {
-						// FIXME gets here whilst adding multiple scripts.
 					}
 				}
 			});
