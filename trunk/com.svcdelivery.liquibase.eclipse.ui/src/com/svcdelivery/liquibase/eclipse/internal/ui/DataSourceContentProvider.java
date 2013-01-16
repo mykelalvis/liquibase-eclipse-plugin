@@ -140,14 +140,12 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 				public void run() {
 					Set<IConnectionProfile> keySet = changeSets.keySet();
 					if (keySet.size() > index) {
-						Object element = keySet.toArray()[index];
+						IConnectionProfile element = keySet
+								.toArray(new IConnectionProfile[keySet.size()])[index];
+						changeSets.put(element, null);
 						viewer.replace(parent, index, element);
-						if (element instanceof IConnectionProfile) {
-							Object[] children = viewer.getExpandedElements();
-							viewer.setExpandedState(element, false);
-							viewer.remove(element, children);
-							viewer.setHasChildren(element, true);
-						}
+						viewer.setExpandedState(element, false);
+						viewer.setHasChildren(element, true);
 					}
 				}
 			});
@@ -200,6 +198,8 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 			List<ChangeSetTreeItem> ran = changeSets.get(profile);
 			if (ran != null) {
 				newCount = ran.size();
+			} else {
+				newCount = 1;
 			}
 		}
 		if (newCount != currentChildCount) {
