@@ -88,7 +88,7 @@ public class DataSourceViewPart extends ViewPart implements
 							break;
 						}
 						if (!(next instanceof IConnectionProfile)) {
-							rollback = false;
+							refresh = false;
 							break;
 						}
 					}
@@ -106,9 +106,9 @@ public class DataSourceViewPart extends ViewPart implements
 				}
 			}
 		});
+		getSite().registerContextMenu(mgr, dataSources);
 		Menu menu = mgr.createContextMenu(dataSourcesTree);
 		dataSourcesTree.setMenu(menu);
-		getSite().registerContextMenu(mgr, dataSources);
 
 		dataSourcesTree.setHeaderVisible(true);
 		dataSourcesTree.setLinesVisible(true);
