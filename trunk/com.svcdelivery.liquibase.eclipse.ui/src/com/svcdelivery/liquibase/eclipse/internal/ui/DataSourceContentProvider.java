@@ -202,6 +202,9 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 				newCount = 1;
 			}
 		}
+		if (newCount == 0) {
+			newCount = 1;
+		}
 		if (newCount != currentChildCount) {
 			viewer.setChildCount(element, newCount);
 		}
