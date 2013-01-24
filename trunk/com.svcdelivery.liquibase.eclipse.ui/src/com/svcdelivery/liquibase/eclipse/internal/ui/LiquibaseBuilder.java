@@ -16,12 +16,8 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.util.List;
 import java.util.Map;
 
-import liquibase.changelog.DatabaseChangeLog;
-
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
@@ -32,6 +28,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
  * @author nick
  */
 public class LiquibaseBuilder extends IncrementalProjectBuilder {
+
+	/**
+	 * Builder ID.
+	 */
+	public static final String BUILDER_ID = "com.svcdelivery.liquibase.eclipse.LiquibaseBuilder";
 
 	@Override
 	protected final IProject[] build(final int kind,

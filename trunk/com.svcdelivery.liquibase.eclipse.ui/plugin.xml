@@ -227,5 +227,11 @@
          </uri>
       </catalogContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.viewActions">
+         <viewContribution id="com.svcdelivery.liquibase.eclipse.projectsContribution" targetID="com.svcdelivery.liquibase.eclipse.scriptsview">
+         	<action id="com.svcdelivery.liquibase.eclipse.projectsAction" class="com.svcdelivery.liquibase.eclipse.internal.ui.ProjectDialogAction" toolbarPath="additions" icon="images/ide.png"/>
+         </viewContribution>
+   </extension>
 
 </plugin>
