@@ -20,9 +20,7 @@ import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IHandler;
 import org.eclipse.core.commands.IHandlerListener;
-import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -35,14 +33,6 @@ import org.eclipse.ui.handlers.HandlerUtil;
  * 
  */
 public class ConvertToLiquibaseCommandHandler implements IHandler {
-	/**
-	 * Builder ID.
-	 */
-	private static final String ID = "com.svcdelivery.liquibase.eclipse.LiquibaseBuilder";
-	/**
-	 * Liquibase Plugin Nature.
-	 */
-	private static final String NATURE = "com.svcdelivery.liquibase.eclipse";
 
 	@Override
 	public void addHandlerListener(final IHandlerListener handlerListener) {
@@ -62,8 +52,8 @@ public class ConvertToLiquibaseCommandHandler implements IHandler {
 				if (next instanceof IProject) {
 					final IProject project = (IProject) next;
 					try {
-						addNature(project);
-						addBuilder(project);
+						LiquibaseNature.addNature(project);
+						LiquibaseNature.addBuilder(project);
 					} catch (final CoreException e) {
 						throw new ExecutionException(e.getMessage());
 					}
@@ -73,52 +63,6 @@ public class ConvertToLiquibaseCommandHandler implements IHandler {
 		return null;
 	}
 
-	/**
-	 * @param project
-	 *            The project to add the nature to.
-	 * @throws CoreException
-	 *             If there was a problem adding it.
-	 */
-	private void addNature(final IProject project) throws CoreException {
-		final IProjectDescription desc = project.getDescription();
-		final String[] natures = desc.getNatureIds();
-		for (int i = 0; i < natures.length; ++i) {
-			if (natures[i].equals(NATURE)) {
-				return;
-			}
-		}
-		final String[] nc = new String[natures.length + 1];
-		// Add it before other natures.
-		System.arraycopy(natures, 0, nc, 1, natures.length);
-		nc[0] = NATURE;
-		desc.setNatureIds(nc);
-		project.setDescription(desc, null);
-	}
-
-	/**
-	 * @param project
-	 *            The project to add the builder to.
-	 * @throws CoreException
-	 *             If there was a problem adding it.
-	 */
-	private void addBuilder(final IProject project) throws CoreException {
-		final IProjectDescription desc = project.getDescription();
-		final ICommand[] commands = desc.getBuildSpec();
-		for (int i = 0; i < commands.length; ++i) {
-			if (commands[i].getBuilderName().equals(ID)) {
-				return;
-			}
-		}
-		// add builder to project
-		final ICommand command = desc.newCommand();
-		command.setBuilderName(ID);
-		final ICommand[] nc = new ICommand[commands.length + 1];
-		// Add it before other builders.
-		System.arraycopy(commands, 0, nc, 1, commands.length);
-		nc[0] = command;
-		desc.setBuildSpec(nc);
-		project.setDescription(desc, null);
-	}
 
 	@Override
 	public final boolean isEnabled() {

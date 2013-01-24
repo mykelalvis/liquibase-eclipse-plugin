@@ -24,7 +24,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.FillLayout;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
@@ -89,12 +93,25 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	@Override
 	public final void createControl(final Composite parent) {
 		final Composite root = new Composite(parent, SWT.NONE);
-		root.setLayout(new FillLayout());
+		root.setLayout(new GridLayout());
 		cst = new ChangeSetTable(root, SWT.NONE);
+		cst.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		cst.addCompletelistener(this);
 		if (item != null) {
 			cst.setInput(item);
 		}
+		Button projects = new Button(root, SWT.PUSH);
+		projects.setLayoutData(new GridData(SWT.RIGHT, SWT.FILL, false, false));
+		projects.setText("Add Projects");
+		projects.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(SelectionEvent event) {
+				ProjectDialog dialog = new ProjectDialog(
+						getShell());
+				dialog.open();
+			}
+		});
 		setControl(root);
 	}
 
