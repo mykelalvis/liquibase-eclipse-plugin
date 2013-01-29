@@ -16,9 +16,11 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.part.ViewPart;
@@ -28,7 +30,9 @@ import org.eclipse.ui.part.ViewPart;
  * 
  * @author nick
  */
-public class ScriptsViewPart extends ViewPart {
+public class ScriptsViewPart extends ViewPart implements ChangeLogListener {
+
+	private TreeViewer scripts;
 
 	/**
 	 * @param parent
@@ -38,26 +42,57 @@ public class ScriptsViewPart extends ViewPart {
 	 */
 	@Override
 	public final void createPartControl(final Composite parent) {
-		final TreeViewer scripts = new TreeViewer(parent);
-		final Tree scriptsTree = scripts.getTree();
-		final TreeColumn nameColumn = new TreeColumn(scriptsTree, SWT.NONE);
+		scripts = new TreeViewer(parent);
+		Tree scriptsTree = scripts.getTree();
+		TreeColumn nameColumn = new TreeColumn(scriptsTree, SWT.NONE);
 		nameColumn.setText("Name");
 		nameColumn.setWidth(300);
-		final TreeColumn projectColumn = new TreeColumn(scriptsTree, SWT.NONE);
+		TreeColumn projectColumn = new TreeColumn(scriptsTree, SWT.NONE);
 		projectColumn.setText("Project");
 		projectColumn.setWidth(150);
-		final TreeColumn pathColumn = new TreeColumn(scriptsTree, SWT.NONE);
+		TreeColumn pathColumn = new TreeColumn(scriptsTree, SWT.NONE);
 		pathColumn.setText("Path");
 		pathColumn.setWidth(350);
-		final ChangeLogCache changeLogCache = Activator.getDefault()
+		ChangeLogCache changeLogCache = Activator.getDefault()
 				.getChangeLogCache();
 		scripts.setContentProvider(new ScriptsTreeContentProvider());
 		scripts.setLabelProvider(new ScriptsTreeLabelProvider());
 		scripts.setInput(changeLogCache);
+		changeLogCache.addChangeLogListener(this);
+	}
+
+	@Override
+	public void dispose() {
+		ChangeLogCache changeLogCache = Activator.getDefault()
+				.getChangeLogCache();
+		changeLogCache.removeChangeLogListener(this);
+		super.dispose();
 	}
 
 	@Override
 	public void setFocus() {
+	}
+
+	@Override
+	public void changeLogUpdated(final IFile file) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				scripts.refresh();
+			}
+		});
+	}
+
+	@Override
+	public void changeLogRemoved(final IFile file) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				scripts.remove(file);
+			}
+		});
 	}
 
 }

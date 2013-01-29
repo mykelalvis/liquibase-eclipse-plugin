@@ -96,4 +96,8 @@ public class ChangeSetTreeItem {
 		return equal;
 	}
 
+	public void setChangeLogFile(IFile file) {
+		this.file = file;
+	}
+
 }

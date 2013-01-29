@@ -97,7 +97,7 @@ public class LiquibaseNature implements IProjectNature {
 				System.arraycopy(natures, i + 1, nc, i, natures.length - i - 1);
 				desc.setNatureIds(nc);
 				project.setDescription(desc, null);
-				return;
+				break;
 			}
 		}
 	}
@@ -121,9 +121,11 @@ public class LiquibaseNature implements IProjectNature {
 						- 1);
 				desc.setBuildSpec(nc);
 				project.setDescription(desc, null);
-				return;
+				break;
 			}
 		}
+		ChangeLogCache cache = Activator.getDefault().getChangeLogCache();
+		cache.removeFiles(project);
 	}
 
 	@Override
