@@ -21,6 +21,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -28,6 +30,7 @@ import java.util.Set;
 import liquibase.changelog.DatabaseChangeLog;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
@@ -52,9 +55,15 @@ public class ChangeLogCache {
 	private Map<IFile, DatabaseChangeLog> logs;
 
 	/**
+	 * Listeners for changes to the change log cache.
+	 */
+	private Set<ChangeLogListener> listeners;
+
+	/**
 	 * initialise the change log cache.
 	 */
 	public ChangeLogCache() {
+		listeners = new HashSet<ChangeLogListener>();
 		load();
 	}
 
@@ -79,6 +88,7 @@ public class ChangeLogCache {
 	 */
 	public final void remove(final IFile file) {
 		logs.remove(file);
+		notifyChangeLogRemoved(file);
 	}
 
 	/**
@@ -89,6 +99,7 @@ public class ChangeLogCache {
 	 */
 	public final void add(final IFile file, final DatabaseChangeLog changeLog) {
 		logs.put(file, changeLog);
+		notifyChangeLogUpdated(file);
 	}
 
 	/**
@@ -173,4 +184,47 @@ public class ChangeLogCache {
 		return file;
 	}
 
+	/**
+	 * @param listener
+	 *            The listener to add.
+	 */
+	public void addChangeLogListener(ChangeLogListener listener) {
+		listeners.add(listener);
+	}
+
+	/**
+	 * @param listener
+	 *            The listener to remove.
+	 */
+	public void removeChangeLogListener(ChangeLogListener listener) {
+		listeners.remove(listener);
+	}
+
+	private void notifyChangeLogUpdated(IFile file) {
+		for (ChangeLogListener listener : listeners) {
+			listener.changeLogUpdated(file);
+		}
+	}
+
+	private void notifyChangeLogRemoved(IFile file) {
+		for (ChangeLogListener listener : listeners) {
+			listener.changeLogRemoved(file);
+		}
+	}
+
+	public void removeFiles(IProject project) {
+		Iterator<IFile> files = logs.keySet().iterator();
+		while (files.hasNext()) {
+			IFile file = files.next();
+			if (project.equals(file.getProject())) {
+				files.remove();
+				notifyChangeLogRemoved(file);
+			}
+		}
+		persist();
+	}
+
+	public DatabaseChangeLog getChangeLog(IFile file) {
+		return logs.get(file);
+	}
 }

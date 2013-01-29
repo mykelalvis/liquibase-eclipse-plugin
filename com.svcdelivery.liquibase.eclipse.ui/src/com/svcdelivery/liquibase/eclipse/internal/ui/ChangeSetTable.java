@@ -17,10 +17,15 @@
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
@@ -32,7 +37,7 @@ import org.eclipse.swt.widgets.TableColumn;
 /**
  * @author nick
  */
-public class ChangeSetTable extends Composite {
+public class ChangeSetTable extends Composite implements ChangeLogListener {
 
 	/**
 	 * The table viewer.
@@ -58,6 +63,11 @@ public class ChangeSetTable extends Composite {
 	 * True if all entries complete.
 	 */
 	private boolean complete;
+
+	/**
+	 * The change log cache.
+	 */
+	private ChangeLogCache cache;
 
 	/**
 	 * @param parent
@@ -92,6 +102,14 @@ public class ChangeSetTable extends Composite {
 		statusC.setWidth(100);
 		tv.setContentProvider(new CollectionContentProvider());
 		tv.setLabelProvider(new ChangeSetLabelProvider());
+		cache = Activator.getDefault().getChangeLogCache();
+		cache.addChangeLogListener(this);
+	}
+
+	@Override
+	public void dispose() {
+		cache.removeChangeLogListener(this);
+		super.dispose();
 	}
 
 	/**
@@ -175,4 +193,50 @@ public class ChangeSetTable extends Composite {
 	public List<ChangeSetTreeItem> getRollbackList() {
 		return items;
 	}
+
+	@Override
+	public void changeLogUpdated(IFile file) {
+		final Set<ChangeSetTreeItem> toUpdate = new HashSet<ChangeSetTreeItem>();
+		DatabaseChangeLog log = cache.getChangeLog(file);
+		if (log != null) {
+			for (ChangeSetTreeItem item : items) {
+				RanChangeSet set = item.getChangeSet();
+				if (set != null) {
+					ChangeSet changeSet = log.getChangeSet(set);
+					if (changeSet != null) {
+						item.setChangeLogFile(file);
+						toUpdate.add(item);
+					}
+				}
+			}
+		}
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				tv.update(toUpdate.toArray(), null);
+			}
+		});
+		checkComplete();
+	}
+
+	@Override
+	public void changeLogRemoved(IFile file) {
+		final Set<ChangeSetTreeItem> toUpdate = new HashSet<ChangeSetTreeItem>();
+		for (ChangeSetTreeItem item : items) {
+			if (file.equals(item.getChangeLogFile())) {
+				item.setChangeLogFile(null);
+				toUpdate.add(item);
+			}
+		}
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				tv.update(toUpdate.toArray(), null);
+			}
+		});
+		checkComplete();
+	}
+
 }

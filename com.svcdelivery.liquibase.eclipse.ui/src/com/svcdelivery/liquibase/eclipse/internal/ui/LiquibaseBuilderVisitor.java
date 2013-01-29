@@ -85,7 +85,7 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 							resourceAccessor);
 					final ChangeLogParameters params = new ChangeLogParameters();
 					final DatabaseChangeLog changeLog = parser
-							.parse(file.getLocation().toString(), params,
+							.parse(file.getName(), params,
 									resourceAccessor);
 					if (changeLog != null) {
 						changeLogCache.add(file, changeLog);

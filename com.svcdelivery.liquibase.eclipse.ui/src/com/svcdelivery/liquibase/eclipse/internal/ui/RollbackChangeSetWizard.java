@@ -18,6 +18,7 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
 
 import liquibase.Liquibase;
@@ -75,6 +76,7 @@ public class RollbackChangeSetWizard extends Wizard {
 			protected IStatus run(final IProgressMonitor monitor) {
 				List<ChangeSetTreeItem> rollbackList = rollbackPage
 						.getRollbackList();
+				Collections.reverse(rollbackList);
 				monitor.beginTask("rollback", rollbackList.size());
 				if (!monitor.isCanceled()) {
 					String filename = null;

@@ -17,9 +17,7 @@
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -99,11 +97,13 @@ public class ProjectDialog extends Dialog {
 					if (!project.hasNature(LiquibaseNature.NATURE)) {
 						LiquibaseNature.addNature(project);
 						LiquibaseNature.addBuilder(project);
+						//project.touch(null);
 					}
 				} else {
 					if (project.hasNature(LiquibaseNature.NATURE)) {
 						LiquibaseNature.removeNature(project);
 						LiquibaseNature.removeBuilder(project);
+						//project.touch(null);
 					}
 				}
 			} catch (CoreException e) {
