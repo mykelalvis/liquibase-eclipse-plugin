@@ -141,6 +141,7 @@ public class ChangeLogCache {
 	 * Persist the list of changelog files to storage.
 	 */
 	public final void persist() {
+		System.out.println("persist");
 		IPath folder = Activator.getDefault().getStateLocation();
 		IPath location = folder.append(FILENAME);
 		File file = location.toFile();
@@ -150,6 +151,7 @@ public class ChangeLogCache {
 			String logName = log.getProject().getName() + File.separator
 					+ log.getProjectRelativePath().toOSString();
 			properties.put(logName, "-");
+			System.out.println(logName);
 		}
 		FileWriter fw = null;
 		try {
