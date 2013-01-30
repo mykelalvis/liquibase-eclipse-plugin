@@ -62,7 +62,8 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 		int kind = delta.getKind();
 		IResource resource = delta.getResource();
 		if (kind == IResourceDelta.ADDED || kind == IResourceDelta.CHANGED) {
-			visit(resource);
+			resource.accept(this);
+			// visit(resource);
 		} else if (kind == IResourceDelta.REMOVED) {
 			if (resource instanceof IFile) {
 				IFile file = (IFile) resource;
@@ -70,11 +71,12 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 			}
 		} else {
 		}
-		return true;
+		return false;
 	}
 
 	@Override
 	public final boolean visit(final IResource resource) throws CoreException {
+		System.out.println("visiting " + resource.getLocation().toString());
 		if (resource instanceof IFile) {
 			final IFile file = (IFile) resource;
 			if (file.exists() && "xml".equals(file.getFileExtension())) {
@@ -84,9 +86,8 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 					final ChangeLogParser parser = factory.getParser("xml",
 							resourceAccessor);
 					final ChangeLogParameters params = new ChangeLogParameters();
-					final DatabaseChangeLog changeLog = parser
-							.parse(file.getName(), params,
-									resourceAccessor);
+					final DatabaseChangeLog changeLog = parser.parse(
+							file.getName(), params, resourceAccessor);
 					if (changeLog != null) {
 						changeLogCache.add(file, changeLog);
 					}
