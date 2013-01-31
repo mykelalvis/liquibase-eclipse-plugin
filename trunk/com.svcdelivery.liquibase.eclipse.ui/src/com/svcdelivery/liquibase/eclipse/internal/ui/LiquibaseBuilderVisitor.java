@@ -63,7 +63,6 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 		IResource resource = delta.getResource();
 		if (kind == IResourceDelta.ADDED || kind == IResourceDelta.CHANGED) {
 			resource.accept(this);
-			// visit(resource);
 		} else if (kind == IResourceDelta.REMOVED) {
 			if (resource instanceof IFile) {
 				IFile file = (IFile) resource;

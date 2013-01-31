@@ -24,6 +24,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -35,6 +36,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.part.ViewPart;
 
 /**
@@ -70,6 +72,7 @@ public class DataSourceViewPart extends ViewPart implements
 		typeColumn.setWidth(100);
 
 		MenuManager mgr = new MenuManager();
+		mgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		mgr.addMenuListener(new IMenuListener() {
 
 			@Override
@@ -107,6 +110,7 @@ public class DataSourceViewPart extends ViewPart implements
 			}
 		});
 		getSite().registerContextMenu(mgr, dataSources);
+		getSite().setSelectionProvider(dataSources);
 		Menu menu = mgr.createContextMenu(dataSourcesTree);
 		dataSourcesTree.setMenu(menu);
 
