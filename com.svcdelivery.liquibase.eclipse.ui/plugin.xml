@@ -9,7 +9,7 @@
       </category>
       <view
             category="com.svcdelivery.liquibase.eclipse.category"
-            class="com.svcdelivery.liquibase.eclipse.LiquibaseResultsViewPart"
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.LiquibaseResultsViewPart"
             icon="images/run_exc.gif"
             id="com.svcdelivery.liquibase.eclipse.resultsview"
             name="%com.svcdelivery.liquibase.eclipse.resultsview"
@@ -230,7 +230,7 @@
    <extension
          point="org.eclipse.ui.viewActions">
          <viewContribution id="com.svcdelivery.liquibase.eclipse.projectsContribution" targetID="com.svcdelivery.liquibase.eclipse.scriptsview">
-         	<action id="com.svcdelivery.liquibase.eclipse.projectsAction" class="com.svcdelivery.liquibase.eclipse.internal.ui.ProjectDialogAction" toolbarPath="additions" icon="images/ide.png"/>
+         	<action id="com.svcdelivery.liquibase.eclipse.projectsAction" label="%com.svcdelivery.liquibase.eclipse.projects" class="com.svcdelivery.liquibase.eclipse.internal.ui.ProjectDialogAction" toolbarPath="additions" icon="images/ide.png"/>
          </viewContribution>
    </extension>
 
