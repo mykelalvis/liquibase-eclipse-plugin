@@ -50,6 +50,11 @@ public class UpdateScriptsWizard extends Wizard {
 	private final List<IFile> files;
 
 	/**
+	 * Optional page to order multiple scripts.
+	 */
+	private ScriptOrderPage scriptOrderPage;
+
+	/**
 	 * The data source selection page.
 	 */
 	private DataSourcePage dataSourcePage;
@@ -64,6 +69,10 @@ public class UpdateScriptsWizard extends Wizard {
 
 	@Override
 	public final void addPages() {
+		if (files.size() > 1) {
+			scriptOrderPage = new ScriptOrderPage(files);
+			addPage(scriptOrderPage);
+		}
 		dataSourcePage = new DataSourcePage(SWT.MULTI);
 		addPage(dataSourcePage);
 	}
