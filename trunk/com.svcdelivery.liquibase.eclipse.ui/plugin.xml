@@ -135,7 +135,7 @@
             allPopups="false"
             locationURI="popup:org.eclipse.ui.popup.any">
          <menu
-               icon="images/ide.png"
+               icon="images/drop.png"
                id="com.svcdelivery.liquibase.eclipse.category"
                label="%com.svcdelivery.liquibase.eclipse.category">
             <command
@@ -182,7 +182,7 @@
             locationURI="popup:org.eclipse.ui.projectConfigure?after=additions">
          <command
                commandId="com.svcdelivery.liquibase.eclipse.convertToLiquibase"
-               icon="images/ide.png"
+               icon="images/drop.png"
                label="%com.svcdelivery.liquibase.eclipse.convertToLiquibase"
                style="push">
             <visibleWhen
@@ -223,14 +223,14 @@
          <uri
                id="databaseChangeLog"
                name="http://www.liquibase.org/xml/ns/dbchangelog"
-               uri="platform:/resources/dbchangelog-2.1.xsd">
+               uri="resources/dbchangelog-2.1.xsd">
          </uri>
       </catalogContribution>
    </extension>
    <extension
          point="org.eclipse.ui.viewActions">
          <viewContribution id="com.svcdelivery.liquibase.eclipse.projectsContribution" targetID="com.svcdelivery.liquibase.eclipse.scriptsview">
-         	<action id="com.svcdelivery.liquibase.eclipse.projectsAction" label="%com.svcdelivery.liquibase.eclipse.projects" class="com.svcdelivery.liquibase.eclipse.internal.ui.ProjectDialogAction" toolbarPath="additions" icon="images/ide.png"/>
+         	<action id="com.svcdelivery.liquibase.eclipse.projectsAction" label="%com.svcdelivery.liquibase.eclipse.projects" class="com.svcdelivery.liquibase.eclipse.internal.ui.ProjectDialogAction" toolbarPath="additions" icon="images/add.png"/>
          </viewContribution>
    </extension>
 
