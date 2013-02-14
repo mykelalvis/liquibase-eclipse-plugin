@@ -1,0 +1,19 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Liquibase Eclipse UI
+Bundle-SymbolicName: com.svcdelivery.liquibase.eclipse.ui;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.svcdelivery.liquibase.eclipse.internal.ui.Activator
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime,
+ org.eclipse.core.resources,
+ org.eclipse.datatools.connectivity,
+ org.eclipse.wst.xml.core,
+ org.liquibase.osgi;bundle-version="2.0.5"
+Bundle-ActivationPolicy: lazy
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ lib/jbossjta.jar,
+ lib/jboss-transaction-api_1.1_spec-1.0.0.Final.jar,
+ lib/jboss-logging.jar
