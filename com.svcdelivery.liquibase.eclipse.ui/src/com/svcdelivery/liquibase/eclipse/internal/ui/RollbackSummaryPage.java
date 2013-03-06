@@ -55,7 +55,7 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	/**
 	 * Constructor to allow change set item to be set later.
 	 */
-	private RollbackSummaryPage() {
+	public RollbackSummaryPage() {
 		super("Rollback Summary");
 		setTitle("Rollback Summary");
 		setMessage("Click Finish to apply the rollbacks.");
