@@ -53,13 +53,11 @@
       </category>
       <command
             categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
-            defaultHandler="com.svcdelivery.liquibase.eclipse.UpdateCommandHandler"
             id="com.svcdelivery.liquibase.eclipse.update"
             name="%com.svcdelivery.liquibase.eclipse.update">
       </command>
       <command
             categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
-            defaultHandler="com.svcdelivery.liquibase.eclipse.RollbackCommandHandler"
             id="com.svcdelivery.liquibase.eclipse.rollback"
             name="%com.svcdelivery.liquibase.eclipse.rollback">
       </command>
@@ -67,6 +65,11 @@
             categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
             id="com.svcdelivery.liquibase.eclipse.convertToLiquibase"
             name="%com.svcdelivery.liquibase.eclipse.convertToLiquibase">
+      </command>
+      <command
+            categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
+            id="com.svcdelivery.liquibase.eclipse.reverse"
+            name="%com.svcdelivery.liquibase.eclipse.reverse">
       </command>
    </extension>
    <extension
@@ -128,6 +131,22 @@
             </iterate>
          </activeWhen>
       </handler>
+      <handler
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.GenerateScriptCommandHandler"
+            commandId="com.svcdelivery.liquibase.eclipse.reverse">
+         <activeWhen>
+            <iterate
+                  ifEmpty="false"
+                  operator="and">
+               <adapt
+                     type="org.eclipse.core.resources.IResource">
+                  <instanceof
+                        value="org.eclipse.core.resources.IResource">
+                  </instanceof>
+               </adapt>
+            </iterate>
+         </activeWhen>
+      </handler>
    </extension>
    <extension
          point="org.eclipse.ui.menus">
@@ -173,6 +192,20 @@
                         </test>
                      </adapt>
                   </iterate>
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="com.svcdelivery.liquibase.eclipse.reverse"
+                  label="%com.svcdelivery.liquibase.eclipse.reverse"
+                  style="push">
+               <visibleWhen
+                     checkEnabled="false">
+                  <adapt
+                        type="org.eclipse.core.resources.IResource">
+                     <instanceof
+                           value="org.eclipse.core.resources.IResource">
+                     </instanceof>
+                  </adapt>
                </visibleWhen>
             </command>
          </menu>
