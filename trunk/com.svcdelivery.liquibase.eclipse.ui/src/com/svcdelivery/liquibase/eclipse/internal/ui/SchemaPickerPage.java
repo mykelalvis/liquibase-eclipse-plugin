@@ -49,7 +49,7 @@ public class SchemaPickerPage extends WizardPage implements CompleteListener {
 	public void createControl(Composite parent) {
 		Composite root = new Composite(parent, SWT.NONE);
 		root.setLayout(new GridLayout());
-		schemaList = new ListViewer(parent);
+		schemaList = new ListViewer(root);
 		schemaList.getList().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, true));
 		schemaList.setContentProvider(new CollectionContentProvider());
