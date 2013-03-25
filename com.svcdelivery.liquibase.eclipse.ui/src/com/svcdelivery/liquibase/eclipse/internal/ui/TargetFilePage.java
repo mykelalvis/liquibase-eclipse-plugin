@@ -11,6 +11,8 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -65,6 +67,13 @@ public class TargetFilePage extends WizardPage {
 							if (resource instanceof IFile) {
 								targetParent = resource.getParent();
 								targetFilename = resource.getName();
+								Display.getDefault().asyncExec(new Runnable() {
+
+									@Override
+									public void run() {
+										targetFile.setText(targetFilename);
+									}
+								});
 							} else {
 								targetParent = (IContainer) resource;
 							}
@@ -72,7 +81,8 @@ public class TargetFilePage extends WizardPage {
 					}
 				}
 				setPageComplete(targetParent != null && targetFilename != null);
-				updateControls();
+				// updateControls();
+				updatePageComplete();
 			}
 		});
 		targetTree.setInput(ResourcesPlugin.getWorkspace().getRoot());
@@ -80,9 +90,17 @@ public class TargetFilePage extends WizardPage {
 		targetFileLabel.setText("Target Filename:");
 		targetFileLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false,
 				false));
-		targetFile = new Text(root, SWT.NONE);
+		targetFile = new Text(root, SWT.FLAT | SWT.BORDER);
 		targetFile
 				.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+		targetFile.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent e) {
+				targetFilename = targetFile.getText();
+				updatePageComplete();
+			}
+		});
 		updateControls();
 		setControl(root);
 	}
@@ -96,9 +114,31 @@ public class TargetFilePage extends WizardPage {
 
 			@Override
 			public void run() {
-				ISelection selection = new StructuredSelection(targetParent);
-				targetTree.setSelection(selection, true);
-				targetFile.setText(targetFilename);
+				ISelection selection = null;
+				if (targetParent != null) {
+					selection = new StructuredSelection(targetParent);
+				}
+				if (!targetTree.getTree().isDisposed()) {
+					targetTree.setSelection(selection, true);
+				}
+				if (!targetFile.isDisposed()) {
+					targetFile.setText(targetFilename == null ? ""
+							: targetFilename);
+				}
+			}
+		});
+	}
+
+	private void updatePageComplete() {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				if (!targetFile.isDisposed()) {
+					String text = targetFile.getText();
+					setPageComplete(targetParent != null && text != null
+							&& text.length() > 0);
+				}
 			}
 		});
 	}
