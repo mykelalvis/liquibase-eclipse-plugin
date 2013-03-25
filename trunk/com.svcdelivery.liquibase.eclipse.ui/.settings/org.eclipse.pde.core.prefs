@@ -1,0 +1,2 @@
+eclipse.preferences.version=1
+selfhosting.binExcludes=/com.svcdelivery.liquibase.eclipse.ui/target/test-classes

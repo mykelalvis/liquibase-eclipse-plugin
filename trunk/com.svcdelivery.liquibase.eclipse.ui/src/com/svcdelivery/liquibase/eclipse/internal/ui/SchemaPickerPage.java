@@ -82,8 +82,10 @@ public class SchemaPickerPage extends WizardPage implements CompleteListener {
 					IStatus status = Status.CANCEL_STATUS;
 					Connection connection = null;
 					ResultSet schemaSet = null;
+					ResultSet catalogSet = null;
 					try {
 						connection = ConnectionUtil.getConnection(profile);
+						selectedSchema = connection.getCatalog();
 						DatabaseMetaData md = connection.getMetaData();
 						schemaSet = md.getSchemas();
 						final List<String> schemas = new ArrayList<String>();
@@ -91,16 +93,34 @@ public class SchemaPickerPage extends WizardPage implements CompleteListener {
 							String schema = schemaSet.getString(1);
 							schemas.add(schema);
 						}
+						catalogSet = md.getCatalogs();
+						while (catalogSet.next()) {
+							String schema = catalogSet.getString(1);
+							schemas.add(schema);
+						}
 						Display.getDefault().asyncExec(new Runnable() {
 
 							@Override
 							public void run() {
 								schemaList.setInput(schemas);
+								if (selectedSchema != null
+										&& schemas.contains(selectedSchema)) {
+									ISelection selection = new StructuredSelection(
+											selectedSchema);
+									schemaList.setSelection(selection, true);
+								}
 							}
 						});
 					} catch (SQLException e) {
 						e.printStackTrace();
 					} finally {
+						if (catalogSet != null) {
+							try {
+								catalogSet.close();
+							} catch (SQLException e) {
+								e.printStackTrace();
+							}
+						}
 						if (schemaSet != null) {
 							try {
 								schemaSet.close();
@@ -121,6 +141,10 @@ public class SchemaPickerPage extends WizardPage implements CompleteListener {
 			};
 			loadSchemas.schedule();
 		}
+	}
+
+	public String getSchema() {
+		return selectedSchema;
 	}
 
 }

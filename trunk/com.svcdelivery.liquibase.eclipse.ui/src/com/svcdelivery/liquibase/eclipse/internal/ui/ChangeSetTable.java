@@ -132,6 +132,14 @@ public class ChangeSetTable extends Composite implements ChangeLogListener {
 					for (RanChangeSet set : rollbackList) {
 						ChangeSetTreeItem item = new ChangeSetTreeItem();
 						item.setChangeSet(set);
+						String filename = set.getChangeLog();
+						System.out.println("Filename="+filename);
+						System.out.println("cache="+cache.toString());
+//						FIXME convert to cache name?
+						IFile file = cache.getFile(filename);
+						if (file != null) {
+							item.setChangeLogFile(file);
+						}
 						item.setProfile(selected.getProfile());
 						items.add(item);
 					}

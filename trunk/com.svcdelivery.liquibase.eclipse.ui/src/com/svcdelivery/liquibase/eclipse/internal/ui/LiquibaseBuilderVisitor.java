@@ -16,33 +16,18 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.Status;
 
 /**
  * @author nick
  */
 public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 		IResourceVisitor {
-
-	/**
-	 * Change log parser factory.
-	 */
-	private final ChangeLogParserFactory factory;
 
 	/**
 	 * Located change logs.
@@ -53,7 +38,6 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 	 * Constructor.
 	 */
 	public LiquibaseBuilderVisitor() {
-		factory = ChangeLogParserFactory.getInstance();
 		changeLogCache = Activator.getDefault().getChangeLogCache();
 	}
 
@@ -75,27 +59,9 @@ public class LiquibaseBuilderVisitor implements IResourceDeltaVisitor,
 
 	@Override
 	public final boolean visit(final IResource resource) throws CoreException {
-		System.out.println("visiting " + resource.getLocation().toString());
 		if (resource instanceof IFile) {
 			final IFile file = (IFile) resource;
-			if (file.exists() && "xml".equals(file.getFileExtension())) {
-				final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-						file.getParent().getLocation().toString());
-				try {
-					final ChangeLogParser parser = factory.getParser("xml",
-							resourceAccessor);
-					final ChangeLogParameters params = new ChangeLogParameters();
-					final DatabaseChangeLog changeLog = parser.parse(
-							file.getName(), params, resourceAccessor);
-					if (changeLog != null) {
-						changeLogCache.add(file, changeLog);
-					}
-				} catch (final ChangeLogParseException e) {
-				} catch (final LiquibaseException e) {
-					throw new CoreException(Status.CANCEL_STATUS);
-				}
-
-			}
+			changeLogCache.add(file);
 		}
 		return true;
 	}

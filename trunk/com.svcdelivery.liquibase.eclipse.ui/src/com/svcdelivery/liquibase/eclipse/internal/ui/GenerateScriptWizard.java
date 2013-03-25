@@ -1,11 +1,13 @@
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.Executor;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -20,6 +22,7 @@ import liquibase.resource.ResourceAccessor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -70,8 +73,8 @@ public class GenerateScriptWizard extends Wizard {
 								.toString());
 				final Connection connection = ConnectionUtil
 						.getConnection(profile);
-				IFile target = targetFilePage.getTargetContainer().getFile(
-						new Path(targetFilePage.getFilename()));
+				final IFile target = targetFilePage.getTargetContainer()
+						.getFile(new Path(targetFilePage.getFilename()));
 				String changeLogFile = target.getName();
 				if (connection != null) {
 					try {
@@ -84,23 +87,40 @@ public class GenerateScriptWizard extends Wizard {
 							final Liquibase lb = new Liquibase(changeLogFile,
 									resourceAccessor, database);
 							Database targetDb = lb.getDatabase();
-							Diff diff = lb.diff(null, targetDb);
+							String schema = schemaPickerPage.getSchema();
+							Diff diff = new Diff(targetDb, schema);
 							diff.addStatusListener(new DiffStatusListener() {
 
 								@Override
 								public void statusUpdate(String message) {
-									// TODO Auto-generated method stub
+									System.out.println(message);
 								}
 							});
 							DiffResult diffResult = diff.compare();
 							PipedOutputStream pos = new PipedOutputStream();
-							InputStream source = new PipedInputStream(pos);
-							target.create(source , true, null);
+							final InputStream source = new PipedInputStream(pos);
+							Thread t = new Thread(new Runnable() {
+
+								@Override
+								public void run() {
+									try {
+										if (target.exists()) {
+											target.delete(true, null);
+										}
+										target.create(source, true, null);
+										source.close();
+									} catch (CoreException e) {
+										e.printStackTrace();
+									} catch (IOException e) {
+										e.printStackTrace();
+									}
+								}
+							});
+							t.start();
 							PrintStream out = new PrintStream(pos);
-							diffResult.printChangeLog(out , targetDb);
+							diffResult.printChangeLog(out, targetDb);
 							out.flush();
 							out.close();
-							source.close();
 							ut.commit();
 						} catch (final LiquibaseException e) {
 							e.printStackTrace();

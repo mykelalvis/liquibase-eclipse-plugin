@@ -20,21 +20,34 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 /**
  * Holds the change log scripts detected by the builder.
@@ -49,6 +62,24 @@ public class ChangeLogCache {
 	 */
 	private static final String FILENAME = "changelogs.csv";
 
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<IFile, DatabaseChangeLog> entry : logs.entrySet()) {
+			IFile file = entry.getKey();
+			sb.append(file.getProjectRelativePath().toPortableString());
+			if (entry.getValue() != null) {
+				sb.append(" (loaded)");
+			}
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+
+	// private Map<String, IFile> pathToFile;
+
+	private Map<IFile, List<IFile>> imports;
+
 	/**
 	 * List of cached change logs.
 	 */
@@ -60,10 +91,16 @@ public class ChangeLogCache {
 	private Set<ChangeLogListener> listeners;
 
 	/**
+	 * Change log parser factory.
+	 */
+	private final ChangeLogParserFactory factory;
+
+	/**
 	 * initialise the change log cache.
 	 */
 	public ChangeLogCache() {
 		listeners = new HashSet<ChangeLogListener>();
+		factory = ChangeLogParserFactory.getInstance();
 		load();
 	}
 
@@ -96,10 +133,49 @@ public class ChangeLogCache {
 	 *            The file to add.
 	 * @param changeLog
 	 *            The changelog, or null to lazy load.
+	 * @throws CoreException
 	 */
-	public final void add(final IFile file, final DatabaseChangeLog changeLog) {
-		logs.put(file, changeLog);
-		notifyChangeLogUpdated(file);
+	public final void add(final IFile file) throws CoreException {
+		if (file.exists() && "xml".equals(file.getFileExtension())) {
+			imports.put(file, new ArrayList<IFile>());
+			DatabaseChangeLog changeLog = null;
+			changeLog = loadChangeLog(file);
+			if (changeLog != null) {
+				logs.put(file, changeLog);
+				notifyChangeLogUpdated(file);
+			}
+		}
+	}
+
+	private DatabaseChangeLog loadChangeLog(final IFile file)
+			throws CoreException {
+		DatabaseChangeLog changeLog = null;
+		final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
+				file.getParent().getLocation().toString()) {
+
+			@Override
+			public InputStream getResourceAsStream(String child)
+					throws IOException {
+				List<IFile> imported = imports.get(file);
+				if (imported == null) {
+					imported = new ArrayList<IFile>();
+					imports.put(file, imported);
+				}
+				IFile childFile = file.getParent().getFile(new Path(child));
+				imported.add(childFile);
+				return super.getResourceAsStream(child);
+			}
+		};
+		try {
+			final ChangeLogParser parser = factory.getParser("xml",
+					resourceAccessor);
+			final ChangeLogParameters params = new ChangeLogParameters();
+			changeLog = parser.parse(file.getName(), params, resourceAccessor);
+		} catch (final ChangeLogParseException e) {
+		} catch (final LiquibaseException e) {
+			throw new CoreException(Status.CANCEL_STATUS);
+		}
+		return changeLog;
 	}
 
 	/**
@@ -128,12 +204,27 @@ public class ChangeLogCache {
 			}
 		}
 		logs = new HashMap<IFile, DatabaseChangeLog>();
+		imports = new HashMap<IFile, List<IFile>>();
 		Set<String> keys = properties.stringPropertyNames();
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		for (String key : keys) {
-			IPath path = Path.fromOSString(key);
-			IFile log = root.getFile(path);
-			logs.put(log, null);
+			IPath path = Path.fromPortableString(key);
+			try {
+				IFile log = root.getFile(path);
+				logs.put(log, null);
+				String importList = properties.getProperty(key);
+				if (importList != null && !"-".equals(importList)) {
+					String[] importArray = importList.split(",");
+					List<IFile> imported = new ArrayList<IFile>();
+					for (String importItem : importArray) {
+						IPath importPath = Path.fromPortableString(importItem);
+						imported.add(root.getFile(importPath));
+					}
+					imports.put(log, imported);
+				}
+			} catch (IllegalArgumentException e) {
+				System.out.println(e.getMessage());
+			}
 		}
 	}
 
@@ -141,17 +232,17 @@ public class ChangeLogCache {
 	 * Persist the list of changelog files to storage.
 	 */
 	public final void persist() {
-		System.out.println("persist");
 		IPath folder = Activator.getDefault().getStateLocation();
 		IPath location = folder.append(FILENAME);
 		File file = location.toFile();
 		file.delete();
 		Properties properties = new Properties();
-		for (IFile log : logs.keySet()) {
-			String logName = log.getProject().getName() + File.separator
-					+ log.getProjectRelativePath().toOSString();
-			properties.put(logName, "-");
-			System.out.println(logName);
+		for (Entry<IFile, List<IFile>> entry : imports.entrySet()) {
+			IFile log = entry.getKey();
+			List<IFile> imported = entry.getValue();
+			String logName = toRootRelative(log);
+			String imports = toRootRelative(imported);
+			properties.put(logName, imports);
 		}
 		FileWriter fw = null;
 		try {
@@ -170,6 +261,26 @@ public class ChangeLogCache {
 		}
 	}
 
+	private String toRootRelative(List<IFile> imported) {
+		String paths = "-";
+		if (imported != null && imported.size() > 0) {
+			StringBuilder sb = new StringBuilder();
+			for (IFile file : imported) {
+				if (sb.length() > 0) {
+					sb.append(",");
+				}
+				sb.append(toRootRelative(file));
+			}
+			paths = sb.toString();
+		}
+		return paths;
+	}
+
+	private String toRootRelative(IFile imported) {
+		return imported.getProject().getName() + "/"
+				+ imported.getProjectRelativePath().toPortableString();
+	}
+
 	/**
 	 * @param name
 	 *            The file name.
@@ -177,10 +288,15 @@ public class ChangeLogCache {
 	 */
 	public final IFile getFile(final String name) {
 		IFile file = null;
-		for (IFile next : logs.keySet()) {
-			if (next.getName().equals(name)) {
-				file = next;
-				break;
+		for (Entry<IFile, List<IFile>> entry : imports.entrySet()) {
+			IFile key = entry.getKey();
+			for (IFile next : entry.getValue()) {
+				String nextPath = next.getProjectRelativePath()
+						.toPortableString();
+				if (nextPath.endsWith(name)) {
+					file = key;
+					break;
+				}
 			}
 		}
 		return file;
@@ -227,6 +343,23 @@ public class ChangeLogCache {
 	}
 
 	public DatabaseChangeLog getChangeLog(IFile file) {
-		return logs.get(file);
+		DatabaseChangeLog log = null;
+		if (logs.containsKey(file)) {
+			log = logs.get(file);
+			if (log == null) {
+				try {
+					log = loadChangeLog(file);
+					logs.put(file, log);
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return log;
+	}
+
+	public void clear() {
+		logs.clear();
+		imports.clear();
 	}
 }

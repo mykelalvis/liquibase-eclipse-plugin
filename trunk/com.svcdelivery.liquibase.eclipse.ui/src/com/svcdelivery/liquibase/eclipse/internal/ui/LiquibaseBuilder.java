@@ -40,13 +40,15 @@ public class LiquibaseBuilder extends IncrementalProjectBuilder {
 			throws CoreException {
 		final IProject project = getProject();
 		final LiquibaseBuilderVisitor visitor = new LiquibaseBuilderVisitor();
+		ChangeLogCache changeLogCache = Activator.getDefault().getChangeLogCache();
 		if (FULL_BUILD == kind || CLEAN_BUILD == kind) {
+			changeLogCache.clear();
 			project.accept(visitor);
 		} else {
 			final IResourceDelta delta = getDelta(project);
 			delta.accept(visitor);
 		}
-		Activator.getDefault().getChangeLogCache().persist();
+		changeLogCache.persist();
 		return null;
 	}
 
