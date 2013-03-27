@@ -52,15 +52,13 @@ import org.eclipse.core.runtime.Status;
 /**
  * Holds the change log scripts detected by the builder.
  * 
- * TODO: Hold change logs as a tree to show imports.
- * 
  * @author nick
  */
 public class ChangeLogCache {
 	/**
 	 * File name for storage file.
 	 */
-	private static final String FILENAME = "changelogs.csv";
+	private static final String FILENAME = "changelogs.properties";
 
 	@Override
 	public String toString() {
@@ -107,8 +105,8 @@ public class ChangeLogCache {
 	/**
 	 * @return The cached change logs.
 	 */
-	public final Map<IFile, DatabaseChangeLog> getChangeLogs() {
-		return logs;
+	public final Set<IFile> getChangeLogs() {
+		return imports.keySet();
 	}
 
 	/**
@@ -125,6 +123,12 @@ public class ChangeLogCache {
 	 */
 	public final void remove(final IFile file) {
 		logs.remove(file);
+		imports.remove(file);
+		for (List<IFile> importList : imports.values()) {
+			if (importList != null) {
+				importList.remove(file);
+			}
+		}
 		notifyChangeLogRemoved(file);
 	}
 
@@ -187,6 +191,7 @@ public class ChangeLogCache {
 		IPath folder = Activator.getDefault().getStateLocation();
 		IPath location = folder.append(FILENAME);
 		File file = location.toFile();
+		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		if (file.exists()) {
 			try {
 				fr = new FileReader(file);
@@ -202,11 +207,21 @@ public class ChangeLogCache {
 					}
 				}
 			}
+		} else {
+			// Trigger build of liquibase projects.
+			for (IProject project : root.getProjects()) {
+				try {
+					if (project.hasNature(LiquibaseNature.NATURE)) {
+						project.touch(null);
+					}
+				} catch (CoreException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		logs = new HashMap<IFile, DatabaseChangeLog>();
 		imports = new HashMap<IFile, List<IFile>>();
 		Set<String> keys = properties.stringPropertyNames();
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		for (String key : keys) {
 			IPath path = Path.fromPortableString(key);
 			try {
@@ -288,13 +303,25 @@ public class ChangeLogCache {
 	 */
 	public final IFile getFile(final String name) {
 		IFile file = null;
-		for (Entry<IFile, List<IFile>> entry : imports.entrySet()) {
-			IFile key = entry.getKey();
-			for (IFile next : entry.getValue()) {
+		if (name.contains("/")) {
+			for (Entry<IFile, List<IFile>> entry : imports.entrySet()) {
+				IFile key = entry.getKey();
+				for (IFile next : entry.getValue()) {
+					String nextPath = next.getProjectRelativePath()
+							.toPortableString();
+					if (nextPath.endsWith(name)) {
+						file = key;
+						break;
+					}
+				}
+			}
+
+		} else {
+			for (IFile next : imports.keySet()) {
 				String nextPath = next.getProjectRelativePath()
 						.toPortableString();
 				if (nextPath.endsWith(name)) {
-					file = key;
+					file = next;
 					break;
 				}
 			}
@@ -331,11 +358,12 @@ public class ChangeLogCache {
 	}
 
 	public void removeFiles(IProject project) {
-		Iterator<IFile> files = logs.keySet().iterator();
+		Iterator<IFile> files = imports.keySet().iterator();
 		while (files.hasNext()) {
 			IFile file = files.next();
 			if (project.equals(file.getProject())) {
 				files.remove();
+				logs.remove(file);
 				notifyChangeLogRemoved(file);
 			}
 		}
@@ -359,7 +387,11 @@ public class ChangeLogCache {
 	}
 
 	public void clear() {
+		List<IFile> removed = new ArrayList<IFile>(imports.keySet());
 		logs.clear();
 		imports.clear();
+		for (IFile next : removed) {
+			notifyChangeLogRemoved(next);
+		}
 	}
 }
