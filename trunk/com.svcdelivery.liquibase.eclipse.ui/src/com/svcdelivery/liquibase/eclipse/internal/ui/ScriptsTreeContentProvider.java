@@ -16,9 +16,7 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.util.Map;
-
-import liquibase.changelog.DatabaseChangeLog;
+import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -50,9 +48,9 @@ public class ScriptsTreeContentProvider implements ITreeContentProvider {
 	public final Object[] getElements(final Object inputElement) {
 		Object[] elements = new Object[0];
 		if (cache != null) {
-			Map<IFile, DatabaseChangeLog> changeLogs = cache.getChangeLogs();
+			Set<IFile> changeLogs = cache.getChangeLogs();
 			if (changeLogs != null) {
-				elements = changeLogs.keySet().toArray();
+				elements = changeLogs.toArray();
 			}
 		}
 		return elements;
