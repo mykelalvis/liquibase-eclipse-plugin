@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.0.0.201302141323.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.0.0.201302141323"/>
+   <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.1.0.201304081258.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.1.0.201304081258"/>
 </site>
