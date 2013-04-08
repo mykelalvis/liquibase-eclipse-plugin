@@ -71,6 +71,11 @@
             id="com.svcdelivery.liquibase.eclipse.reverse"
             name="%com.svcdelivery.liquibase.eclipse.reverse">
       </command>
+      <command
+            categoryId="com.svcdelivery.liquibase.eclipse.menu.category"
+            id="com.svcdelivery.liquibase.eclipse.dropAll"
+            name="%com.svcdelivery.liquibase.eclipse.dropAll">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.handlers">
@@ -135,18 +140,14 @@
             class="com.svcdelivery.liquibase.eclipse.internal.ui.GenerateScriptCommandHandler"
             commandId="com.svcdelivery.liquibase.eclipse.reverse">
          <activeWhen>
-            <iterate
-                  ifEmpty="false"
-                  operator="and">
-               <adapt
-                     type="org.eclipse.core.resources.IResource">
-                  <test
-                        property="org.eclipse.core.resources.name"
-                        value="*.xml">
-                  </test>
-               </adapt>
-            </iterate>
+            <count
+                  value="1">
+            </count>
          </activeWhen>
+      </handler>
+      <handler
+            class="com.svcdelivery.liquibase.eclipse.internal.ui.DropAllCommandHandler"
+            commandId="com.svcdelivery.liquibase.eclipse.dropAll">
       </handler>
    </extension>
    <extension
@@ -200,16 +201,19 @@
                   label="%com.svcdelivery.liquibase.eclipse.reverse"
                   style="push">
                <visibleWhen
+                     checkEnabled="true">
+               </visibleWhen>
+            </command>
+            <command
+                  commandId="com.svcdelivery.liquibase.eclipse.dropAll"
+                  label="%com.svcdelivery.liquibase.eclipse.dropAll"
+                  style="push">
+               <visibleWhen
                      checkEnabled="false">
-                  <iterate
-                        operator="and">
-                     <adapt
-                           type="org.eclipse.core.resources.IResource">
-                        <test
-                              property="org.eclipse.core.resources.name"
-                              value="*.xml">
-                        </test>
-                     </adapt>
+                  <iterate>
+                     <instanceof
+                           value="org.eclipse.datatools.connectivity.IConnectionProfile">
+                     </instanceof>
                   </iterate>
                </visibleWhen>
             </command>
