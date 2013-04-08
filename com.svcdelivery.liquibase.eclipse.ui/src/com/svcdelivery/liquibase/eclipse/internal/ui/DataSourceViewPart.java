@@ -71,6 +71,8 @@ public class DataSourceViewPart extends ViewPart implements
 		dateColumn.setWidth(150);
 		typeColumn.setWidth(100);
 
+		getSite().setSelectionProvider(dataSources);
+
 		MenuManager mgr = new MenuManager();
 		mgr.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		mgr.addMenuListener(new IMenuListener() {
@@ -110,7 +112,6 @@ public class DataSourceViewPart extends ViewPart implements
 			}
 		});
 		getSite().registerContextMenu(mgr, dataSources);
-		getSite().setSelectionProvider(dataSources);
 		Menu menu = mgr.createContextMenu(dataSourcesTree);
 		dataSourcesTree.setMenu(menu);
 
