@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Liquibase v2 Support
+Bundle-SymbolicName: com.svcdelivery.liquibase.eclipse.v2;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: SVC Delivery
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.svcdelivery.liquibase.eclipse.api,
+ liquibase;version="[2.0.0,3.0.0)",
+ liquibase.change;version="[2.0.0,3.0.0)",
+ liquibase.changelog;version="[2.0.0,3.0.0)",
+ liquibase.database;version="[2.0.0,3.0.0)",
+ liquibase.database.jvm;version="[2.0.0,3.0.0)",
+ liquibase.diff;version="[2.0.0,3.0.0)",
+ liquibase.exception;version="[2.0.0,3.0.0)",
+ liquibase.resource;version="[2.0.0,3.0.0)"
+Service-Component: OSGI-INF/liquibasev2.xml
+Bundle-ActivationPolicy: lazy
