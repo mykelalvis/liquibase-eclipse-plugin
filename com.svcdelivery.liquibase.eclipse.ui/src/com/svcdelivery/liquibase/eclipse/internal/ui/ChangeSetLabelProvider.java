@@ -18,8 +18,6 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.text.SimpleDateFormat;
 
-import liquibase.changelog.RanChangeSet;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
@@ -68,19 +66,20 @@ public class ChangeSetLabelProvider implements ITableLabelProvider {
 	@Override
 	public final String getColumnText(final Object element, final int column) {
 		String text = "";
-		if (element instanceof RanChangeSet) {
-			final RanChangeSet cs = (RanChangeSet) element;
-			if (column == 0) {
-				text = cs.getChangeLog();
-			} else if (column == 1) {
-				text = df.format(cs.getDateExecuted());
-			}
-		} else if (element instanceof ChangeSetTreeItem) {
+		// if (element instanceof RanChangeSet) {
+		// final RanChangeSet cs = (RanChangeSet) element;
+		// if (column == 0) {
+		// text = cs.getChangeLog();
+		// } else if (column == 1) {
+		// text = df.format(cs.getDateExecuted());
+		// }
+		// } else
+			if (element instanceof ChangeSetTreeItem) {
 			ChangeSetTreeItem item = (ChangeSetTreeItem) element;
 			if (column == 0) {
-				text = item.getChangeSet().getChangeLog();
+				text = item.getChangeLog();
 			} else if (column == 1) {
-				text = df.format(item.getChangeSet().getDateExecuted());
+				text = df.format(item.getDateExecuted());
 			} else if (column == 2) {
 				IFile changeLogFile = item.getChangeLogFile();
 				if (changeLogFile != null) {

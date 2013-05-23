@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
-import liquibase.changelog.RanChangeSet;
-
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.datatools.connectivity.IProfileListener;
 import org.eclipse.datatools.connectivity.ProfileManager;
@@ -31,6 +29,8 @@ import org.eclipse.jface.viewers.ILazyTreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
+
+import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
 
 /**
  * Tree Content provider for data sources and sub elements.
@@ -154,7 +154,7 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 			LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
 				@Override
-				public void complete(final List<RanChangeSet> ranChangeSets) {
+				public void complete(final List<ChangeSetItem> ranChangeSets) {
 					final List<ChangeSetTreeItem> items = wrap(profile,
 							ranChangeSets);
 					changeSets.put(profile, items);
@@ -218,13 +218,15 @@ public class DataSourceContentProvider implements ILazyTreeContentProvider {
 	 * @return a list of change set tree items.
 	 */
 	private List<ChangeSetTreeItem> wrap(final IConnectionProfile profile,
-			final List<RanChangeSet> ranChangeSets) {
+			final List<ChangeSetItem> ranChangeSets) {
 		List<ChangeSetTreeItem> items = new ArrayList<ChangeSetTreeItem>();
-		for (RanChangeSet ranChangeSet : ranChangeSets) {
-			ChangeSetTreeItem item = new ChangeSetTreeItem();
-			item.setProfile(profile);
-			item.setChangeSet(ranChangeSet);
-			items.add(item);
+		if (ranChangeSets != null) {
+			for (ChangeSetItem ranChangeSet : ranChangeSets) {
+				ChangeSetTreeItem item = new ChangeSetTreeItem();
+				item.setProfile(profile);
+				item.setChangeSet(ranChangeSet);
+				items.add(item);
+			}
 		}
 		return items;
 	}

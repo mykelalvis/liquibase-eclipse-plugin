@@ -18,8 +18,6 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.util.List;
 
-import liquibase.changelog.RanChangeSet;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.wizard.WizardPage;
@@ -31,6 +29,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+
+import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
 
 /**
  * @author nick
@@ -107,8 +107,7 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 
 			@Override
 			public void widgetSelected(SelectionEvent event) {
-				ProjectDialog dialog = new ProjectDialog(
-						getShell());
+				ProjectDialog dialog = new ProjectDialog(getShell());
 				dialog.open();
 			}
 		});
@@ -123,11 +122,11 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 			LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
 				@Override
-				public void complete(final List<RanChangeSet> ranChangeSets) {
+				public void complete(List<ChangeSetItem> ranChangeSets) {
 					if (ranChangeSets.size() != 0) {
-						RanChangeSet set = null;
+						ChangeSetItem set = null;
 						String filename = file.getName();
-						for (RanChangeSet next : ranChangeSets) {
+						for (ChangeSetItem next : ranChangeSets) {
 							if (filename.equals(next.getChangeLog())) {
 								set = next;
 								break;

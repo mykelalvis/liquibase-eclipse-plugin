@@ -21,10 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
@@ -33,6 +29,8 @@ import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TableColumn;
+
+import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
 
 /**
  * @author nick
@@ -121,21 +119,21 @@ public class ChangeSetTable extends Composite implements ChangeLogListener {
 		LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
 			@Override
-			public void complete(List<RanChangeSet> ranChangeSets) {
-				RanChangeSet toRollback = selected.getChangeSet();
+			public void complete(List<ChangeSetItem> ranChangeSets) {
+				ChangeSetItem toRollback = selected.getChangeSet();
 				int index = ranChangeSets.indexOf(toRollback);
 				if (index != -1) {
-					final List<RanChangeSet> rollbackList = ranChangeSets
+					final List<ChangeSetItem> rollbackList = ranChangeSets
 							.subList(index, ranChangeSets.size());
 					items = new ArrayList<ChangeSetTreeItem>(
 							rollbackList.size());
-					for (RanChangeSet set : rollbackList) {
+					for (ChangeSetItem set : rollbackList) {
 						ChangeSetTreeItem item = new ChangeSetTreeItem();
 						item.setChangeSet(set);
 						String filename = set.getChangeLog();
-						System.out.println("Filename="+filename);
-						System.out.println("cache="+cache.toString());
-//						FIXME convert to cache name?
+						System.out.println("Filename=" + filename);
+						System.out.println("cache=" + cache.toString());
+						// FIXME convert to cache name?
 						IFile file = cache.getFile(filename);
 						if (file != null) {
 							item.setChangeLogFile(file);
@@ -205,16 +203,15 @@ public class ChangeSetTable extends Composite implements ChangeLogListener {
 	@Override
 	public void changeLogUpdated(IFile file) {
 		final Set<ChangeSetTreeItem> toUpdate = new HashSet<ChangeSetTreeItem>();
-		DatabaseChangeLog log = cache.getChangeLog(file);
-		if (log != null) {
-			for (ChangeSetTreeItem item : items) {
-				RanChangeSet set = item.getChangeSet();
-				if (set != null) {
-					ChangeSet changeSet = log.getChangeSet(set);
-					if (changeSet != null) {
-						item.setChangeLogFile(file);
-						toUpdate.add(item);
-					}
+		for (ChangeSetTreeItem item : items) {
+			ChangeSetItem set = item.getChangeSet();
+			if (set != null) {
+				String changelog = set.getChangeLog();
+				IFile changelogFile = Activator.getDefault()
+						.getChangeLogCache().getFile(changelog);
+				if (file.equals(changelogFile)) {
+					item.setChangeLogFile(file);
+					toUpdate.add(item);
 				}
 			}
 		}

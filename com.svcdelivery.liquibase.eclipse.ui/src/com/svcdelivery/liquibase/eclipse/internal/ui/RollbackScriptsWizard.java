@@ -21,13 +21,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
-import liquibase.Liquibase;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,6 +31,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
 
 import com.arjuna.ats.jta.UserTransaction;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 /**
  * @author nick
@@ -121,8 +116,6 @@ public class RollbackScriptsWizard extends Wizard {
 				result.setTimestamp(System.currentTimeMillis());
 				result.setScript(changeLogFile.getName());
 				Activator.getDefault().getResults().add(result);
-				final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-						changeLogFile.getParent().getLocation().toString());
 				IConnectionProfile profile = dataSourcePage.getProfile();
 				final Connection connection = ConnectionUtil
 						.getConnection(profile);
@@ -132,15 +125,13 @@ public class RollbackScriptsWizard extends Wizard {
 								.userTransaction();
 						ut.begin();
 						try {
-							final DatabaseConnection database = new JdbcConnection(
-									connection);
-							final Liquibase lb = new Liquibase(
-									changeLogFile.getName(), resourceAccessor,
-									database);
-							lb.rollback(count, null);
+							LiquibaseService ls = Activator.getDefault()
+									.getActiveLiquibaseService();
+							ls.rollback(changeLogFile.getLocation().toFile(),
+									count, connection);
 							ut.commit();
 							result.setStatus(LiquibaseResultStatus.SUCCESS);
-						} catch (final LiquibaseException e) {
+						} catch (final LiquibaseApiException e) {
 							e.printStackTrace();
 							ut.rollback();
 							result.setStatus(LiquibaseResultStatus.FAILURE);
