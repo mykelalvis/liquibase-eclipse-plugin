@@ -20,18 +20,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 
-import liquibase.changelog.RanChangeSet;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.DatabaseException;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
+
+import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 /**
  * Class to load a list of Liquibase scripts from a connection profile in the
@@ -60,24 +57,16 @@ public abstract class LiquibaseDataSourceScriptLoader {
 				try {
 					connection = ConnectionUtil.getConnection(profile);
 					if (connection != null) {
-						final DatabaseConnection dbConnection = new JdbcConnection(
-								connection);
+						LiquibaseService liquibaseService = Activator
+								.getDefault().getActiveLiquibaseService();
 						try {
-							DatabaseFactory dbf = DatabaseFactory.getInstance();
-							Database db = dbf
-									.findCorrectDatabaseImplementation(dbConnection);
-							List<RanChangeSet> ranChangeSets = db
-									.getRanChangeSetList();
+							List<ChangeSetItem> ranChangeSets = liquibaseService
+									.getRanChangeSets(connection);
 							complete(ranChangeSets);
 							status = Status.OK_STATUS;
-						} catch (final DatabaseException e) {
-							e.printStackTrace();
-						} finally {
-							try {
-								dbConnection.close();
-							} catch (final DatabaseException e) {
-								e.printStackTrace();
-							}
+						} catch (LiquibaseApiException e) {
+							status = new Status(Status.ERROR,
+									Activator.PLUGIN_ID, e.getMessage());
 						}
 					}
 				} finally {
@@ -101,5 +90,5 @@ public abstract class LiquibaseDataSourceScriptLoader {
 	 * @param ranChangeSets
 	 *            The change sets that have been run.
 	 */
-	public abstract void complete(List<RanChangeSet> ranChangeSets);
+	public abstract void complete(List<ChangeSetItem> ranChangeSets);
 }

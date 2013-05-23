@@ -1,28 +1,10 @@
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.concurrent.Executor;
-
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.Diff;
-import liquibase.diff.DiffResult;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -33,6 +15,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
 
 import com.arjuna.ats.jta.UserTransaction;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 public class GenerateScriptWizard extends Wizard {
 
@@ -68,61 +52,22 @@ public class GenerateScriptWizard extends Wizard {
 			@Override
 			protected IStatus run(IProgressMonitor monitor) {
 				IConnectionProfile profile = dataSourcePage.getProfile();
-				final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-						targetFilePage.getTargetContainer().getLocation()
-								.toString());
 				final Connection connection = ConnectionUtil
 						.getConnection(profile);
 				final IFile target = targetFilePage.getTargetContainer()
 						.getFile(new Path(targetFilePage.getFilename()));
-				String changeLogFile = target.getName();
 				if (connection != null) {
 					try {
 						final javax.transaction.UserTransaction ut = UserTransaction
 								.userTransaction();
 						ut.begin();
 						try {
-							final DatabaseConnection database = new JdbcConnection(
-									connection);
-							final Liquibase lb = new Liquibase(changeLogFile,
-									resourceAccessor, database);
-							Database targetDb = lb.getDatabase();
-							String schema = schemaPickerPage.getSchema();
-							Diff diff = new Diff(targetDb, schema);
-							diff.addStatusListener(new DiffStatusListener() {
-
-								@Override
-								public void statusUpdate(String message) {
-									System.out.println(message);
-								}
-							});
-							DiffResult diffResult = diff.compare();
-							PipedOutputStream pos = new PipedOutputStream();
-							final InputStream source = new PipedInputStream(pos);
-							Thread t = new Thread(new Runnable() {
-
-								@Override
-								public void run() {
-									try {
-										if (target.exists()) {
-											target.delete(true, null);
-										}
-										target.create(source, true, null);
-										source.close();
-									} catch (CoreException e) {
-										e.printStackTrace();
-									} catch (IOException e) {
-										e.printStackTrace();
-									}
-								}
-							});
-							t.start();
-							PrintStream out = new PrintStream(pos);
-							diffResult.printChangeLog(out, targetDb);
-							out.flush();
-							out.close();
+							LiquibaseService ls = Activator.getDefault()
+									.getActiveLiquibaseService();
+							ls.diff(connection, schemaPickerPage.getSchema(),
+									target.getLocation().toFile());
 							ut.commit();
-						} catch (final LiquibaseException e) {
+						} catch (final LiquibaseApiException e) {
 							e.printStackTrace();
 							ut.rollback();
 						}
@@ -143,6 +88,7 @@ public class GenerateScriptWizard extends Wizard {
 
 				return Status.OK_STATUS;
 			}
+
 		};
 		job.schedule();
 		return true;

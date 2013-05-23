@@ -16,16 +16,10 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
-
-import liquibase.Liquibase;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,6 +32,8 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.SWT;
 
 import com.arjuna.ats.jta.UserTransaction;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 /**
  * @author nick
@@ -98,14 +94,12 @@ public class UpdateScriptsWizard extends Wizard {
 				}
 
 				private void runScript(final IFile file) {
+					File f = file.getLocation().toFile();
 					final LiquibaseResult result = new LiquibaseResult();
 					result.setStatus(LiquibaseResultStatus.RUNNING);
 					result.setTimestamp(System.currentTimeMillis());
 					result.setScript(file.getName());
 					Activator.getDefault().getResults().add(result);
-					final String changeLogFile = file.getName();
-					final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-							file.getParent().getLocation().toString());
 					for (IConnectionProfile profile : profiles) {
 						final Connection connection = ConnectionUtil
 								.getConnection(profile);
@@ -115,15 +109,11 @@ public class UpdateScriptsWizard extends Wizard {
 										.userTransaction();
 								ut.begin();
 								try {
-									final DatabaseConnection database = new JdbcConnection(
-											connection);
-									final Liquibase lb = new Liquibase(
-											changeLogFile, resourceAccessor,
-											database);
-									lb.update(null);
+									LiquibaseService ls = Activator.getDefault().getActiveLiquibaseService();
+									ls.update(f, connection);
 									ut.commit();
 									result.setStatus(LiquibaseResultStatus.SUCCESS);
-								} catch (final LiquibaseException e) {
+								} catch (final LiquibaseApiException e) {
 									e.printStackTrace();
 									ut.rollback();
 									result.setStatus(LiquibaseResultStatus.FAILURE);

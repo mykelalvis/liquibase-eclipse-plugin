@@ -18,13 +18,12 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.text.SimpleDateFormat;
 
-import liquibase.changelog.ChangeSet.ExecType;
-import liquibase.changelog.RanChangeSet;
-
 import org.eclipse.datatools.connectivity.IConnectionProfile;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
+
+import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
 
 /**
  * @author nick
@@ -96,7 +95,7 @@ public class DataSourceLabelProvider implements ITableLabelProvider {
 			}
 		} else if (element instanceof ChangeSetTreeItem) {
 			ChangeSetTreeItem item = (ChangeSetTreeItem) element;
-			RanChangeSet changeSet = item.getChangeSet();
+			ChangeSetItem changeSet = item.getChangeSet();
 			if (columnIndex == 0) {
 				text = changeSet.getChangeLog();
 			} else if (columnIndex == 1) {
@@ -106,8 +105,7 @@ public class DataSourceLabelProvider implements ITableLabelProvider {
 			} else if (columnIndex == 3) {
 				text = sdf.format(changeSet.getDateExecuted());
 			} else if (columnIndex == 4) {
-				ExecType et = changeSet.getExecType();
-				text = et.toString();
+				text = changeSet.getExecType();
 			}
 		}
 		return text;

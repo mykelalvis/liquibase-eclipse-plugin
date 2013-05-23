@@ -16,10 +16,12 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
-import liquibase.changelog.RanChangeSet;
+import java.util.Date;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.datatools.connectivity.IConnectionProfile;
+
+import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
 
 /**
  * @author nick
@@ -33,7 +35,7 @@ public class ChangeSetTreeItem {
 	/**
 	 * Change set.
 	 */
-	private RanChangeSet changeSet;
+	private ChangeSetItem changeSet;
 
 	/**
 	 * The workspace file that matches the change set, or null.
@@ -58,7 +60,7 @@ public class ChangeSetTreeItem {
 	/**
 	 * @return Change set.
 	 */
-	public final RanChangeSet getChangeSet() {
+	public final ChangeSetItem getChangeSet() {
 		return changeSet;
 	}
 
@@ -66,7 +68,7 @@ public class ChangeSetTreeItem {
 	 * @param ranChangeSet
 	 *            Change set.
 	 */
-	public final void setChangeSet(final RanChangeSet ranChangeSet) {
+	public final void setChangeSet(final ChangeSetItem ranChangeSet) {
 		changeSet = ranChangeSet;
 		String name = changeSet.getChangeLog();
 		ChangeLogCache cache = Activator.getDefault().getChangeLogCache();
@@ -98,6 +100,16 @@ public class ChangeSetTreeItem {
 
 	public void setChangeLogFile(IFile file) {
 		this.file = file;
+	}
+
+	public String getChangeLog() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Date getDateExecuted() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

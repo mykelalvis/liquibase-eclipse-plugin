@@ -274,5 +274,13 @@
          	<action id="com.svcdelivery.liquibase.eclipse.projectsAction" label="%com.svcdelivery.liquibase.eclipse.projects" class="com.svcdelivery.liquibase.eclipse.internal.ui.ProjectDialogAction" toolbarPath="additions" icon="images/add.png"/>
          </viewContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.svcdelivery.liquibase.eclipse.ui.preferences.LiquibasePreferencePage"
+            id="com.svcdelivery.liquibase.eclipse.ui.preferences"
+            name="%com.svcdelivery.liquibase.eclipse.category">
+      </page>
+   </extension>
 
 </plugin>

@@ -19,10 +19,16 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -34,10 +40,19 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static final String PLUGIN_ID = "com.svcdelivery.liquibase.eclipse.ui"; //$NON-NLS-1$
 
+	private static final String DEFAULT_SERVICE_VERSION = "default-liquibase-service";
+
+	protected static final String VERSION = "version";
+
 	/**
 	 * The shared instance.
 	 */
 	private static Activator plugin;
+
+	/**
+	 * The version of the default liquibase service.
+	 */
+	private int defaultLiquibaseVersion;
 
 	/**
 	 * The results from running the last changelog.
@@ -53,6 +68,21 @@ public class Activator extends AbstractUIPlugin {
 	 * A set of database update listeners.
 	 */
 	private Set<DatabaseUpdateListener> databaseUpdateListeners;
+
+	/**
+	 * Liquibase service tracker.
+	 */
+	private ServiceTracker<LiquibaseService, LiquibaseService> lbst;
+
+	/**
+	 * Reference to the active service.
+	 */
+	private ServiceReference<LiquibaseService> activeRef;
+
+	/**
+	 * The active liquibase service.
+	 */
+	private LiquibaseService active;
 
 	/**
 	 * @param context
@@ -75,7 +105,66 @@ public class Activator extends AbstractUIPlugin {
 		}
 		registerImage("script.gif");
 		registerImage("database.gif");
+		readPreferences();
+		lbst = new ServiceTracker<LiquibaseService, LiquibaseService>(
+				context,
+				LiquibaseService.class,
+				new ServiceTrackerCustomizer<LiquibaseService, LiquibaseService>() {
 
+					@Override
+					public LiquibaseService addingService(
+							ServiceReference<LiquibaseService> reference) {
+						LiquibaseService svc = null;
+						Integer serviceVersion = getServiceVersion(reference);
+						if (serviceVersion != null) {
+							Integer activeVersion = getServiceVersion(activeRef);
+							svc = context.getService(reference);
+							// If
+							// - This is the default
+							// - OR the active service is null
+
+							// - OR (the active service is not the default AND
+							// this
+							// service has a higher version number)
+							if ((defaultLiquibaseVersion != 0 && defaultLiquibaseVersion == serviceVersion)
+									|| activeRef == null
+									|| (activeVersion != null && serviceVersion > activeVersion)) {
+								activeRef = reference;
+								active = svc;
+							}
+						}
+						return svc;
+					}
+
+					@Override
+					public void modifiedService(
+							ServiceReference<LiquibaseService> reference,
+							LiquibaseService service) {
+					}
+
+					@Override
+					public void removedService(
+							ServiceReference<LiquibaseService> reference,
+							LiquibaseService service) {
+						if (reference.equals(activeRef)) {
+							active = null;
+							activeRef = null;
+							// TODO Use highest version
+						}
+						context.ungetService(reference);
+					}
+				});
+		lbst.open();
+	}
+
+	private void readPreferences() {
+		IPreferenceStore store = getPreferenceStore();
+		defaultLiquibaseVersion = store.getInt(DEFAULT_SERVICE_VERSION);
+	}
+
+	private void writePreferences() {
+		IPreferenceStore store = getPreferenceStore();
+		store.setValue(DEFAULT_SERVICE_VERSION, defaultLiquibaseVersion);
 	}
 
 	/**
@@ -98,6 +187,8 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	@Override
 	public final void stop(final BundleContext context) throws Exception {
+		lbst.close();
+		setActiveLiquibaseService(null);
 		plugin = null;
 		super.stop(context);
 	}
@@ -166,4 +257,63 @@ public class Activator extends AbstractUIPlugin {
 			listener.databaseUpdated(event);
 		}
 	}
+
+	/**
+	 * @return An array of service references to available liquibase services.
+	 */
+	public final ServiceReference<LiquibaseService>[] getLiquibaseServices() {
+		return lbst.getServiceReferences();
+	}
+
+	/**
+	 * @return The currently active liquibase service.
+	 */
+	public final LiquibaseService getActiveLiquibaseService() {
+		return active;
+	}
+
+	/**
+	 * @return The currently active liquibase service.
+	 */
+	public final void setActiveLiquibaseService(
+			ServiceReference<LiquibaseService> ref) {
+		BundleContext bundleContext = getBundle().getBundleContext();
+		if (activeRef != null && active != null) {
+			bundleContext.ungetService(activeRef);
+		}
+		activeRef = ref;
+		if (ref != null) {
+			active = bundleContext.getService(activeRef);
+		}
+	}
+
+	public final void setDefaultLiquibaseService(
+			ServiceReference<LiquibaseService> newDefaultLiquibaseService) {
+		Integer newVersion = getServiceVersion(newDefaultLiquibaseService);
+		defaultLiquibaseVersion = newVersion == null ? 0 : newVersion;
+		writePreferences();
+		setActiveLiquibaseService(newDefaultLiquibaseService);
+	}
+
+	/**
+	 * @param reference
+	 *            The service reference.
+	 * @return The service version.
+	 */
+	private Integer getServiceVersion(
+			final ServiceReference<LiquibaseService> reference) {
+		Integer version = null;
+		if (reference != null) {
+			Object property = reference.getProperty(VERSION);
+			if (property instanceof Integer) {
+				version = (Integer) reference.getProperty(VERSION);
+			}
+		}
+		return version;
+	}
+
+	public ServiceReference<LiquibaseService> getActiveLiquibaseServiceReference() {
+		return activeRef;
+	}
+
 }
