@@ -263,8 +263,56 @@
          point="org.eclipse.wst.xml.core.catalogContributions">
       <catalogContribution>
          <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd"
+               uri="resources/dbchangelog-1.0.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd"
+               uri="resources/dbchangelog-1.1.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.2.xsd"
+               uri="resources/dbchangelog-1.2.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.3.xsd"
+               uri="resources/dbchangelog-1.3.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd"
+               uri="resources/dbchangelog-1.4.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.5.xsd"
+               uri="resources/dbchangelog-1.5.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.6.xsd"
+               uri="resources/dbchangelog-1.6.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd"
+               uri="resources/dbchangelog-1.7.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.8.xsd"
+               uri="resources/dbchangelog-1.8.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd"
+               uri="resources/dbchangelog-1.9.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"
+               uri="resources/dbchangelog-2.0.xsd">
+         </system>
+         <system
                systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.1.xsd"
                uri="resources/dbchangelog-2.1.xsd">
+         </system>
+         <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
+               uri="resources/dbchangelog-ext.xsd">
          </system>
       </catalogContribution>
    </extension>
