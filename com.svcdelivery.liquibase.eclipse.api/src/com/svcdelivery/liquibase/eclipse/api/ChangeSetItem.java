@@ -68,4 +68,30 @@ public class ChangeSetItem {
 		this.execType = execType;
 	}
 
+	@Override
+	public int hashCode() {
+		return id.hashCode() + (changeLog == null ? 0 : changeLog.hashCode());
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		boolean equal = false;
+		if (obj instanceof ChangeSetItem) {
+			ChangeSetItem other = (ChangeSetItem) obj;
+			if (id.equals(other.id)) {
+				if ((changeLog == null && other.changeLog == null)
+						|| (changeLog != null && changeLog
+								.equals(other.changeLog))) {
+					equal = true;
+				}
+			}
+		}
+		return equal;
+	}
+
+	@Override
+	public String toString() {
+		return id + ":" + changeLog;
+	}
+
 }

@@ -119,7 +119,7 @@ public class ChangeSetTable extends Composite implements ChangeLogListener {
 		LiquibaseDataSourceScriptLoader loader = new LiquibaseDataSourceScriptLoader() {
 
 			@Override
-			public void complete(List<ChangeSetItem> ranChangeSets) {
+			public void complete(final List<ChangeSetItem> ranChangeSets) {
 				ChangeSetItem toRollback = selected.getChangeSet();
 				int index = ranChangeSets.indexOf(toRollback);
 				if (index != -1) {

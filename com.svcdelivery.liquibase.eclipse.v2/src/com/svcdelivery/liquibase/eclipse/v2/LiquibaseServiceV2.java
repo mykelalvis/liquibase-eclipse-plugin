@@ -117,15 +117,14 @@ public class LiquibaseServiceV2 implements LiquibaseService {
 	public void rollback(File changeLogFile, int count, Connection connection)
 			throws LiquibaseApiException {
 		try {
-			final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
+			ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
 					changeLogFile.getParent());
-			final DatabaseConnection database = new JdbcConnection(connection);
-			final Liquibase lb = new Liquibase(changeLogFile.getName(),
+			DatabaseConnection database = new JdbcConnection(connection);
+			Liquibase lb = new Liquibase(changeLogFile.getName(),
 					resourceAccessor, database);
 			lb.rollback(count, null);
 		} catch (LiquibaseException e) {
 			throw new LiquibaseApiException(e);
 		}
 	}
-
 }

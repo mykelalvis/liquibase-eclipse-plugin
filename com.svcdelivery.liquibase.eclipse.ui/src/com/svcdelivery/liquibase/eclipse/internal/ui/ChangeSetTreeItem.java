@@ -103,13 +103,11 @@ public class ChangeSetTreeItem {
 	}
 
 	public String getChangeLog() {
-		// TODO Auto-generated method stub
-		return null;
+		return changeSet.getChangeLog();
 	}
 
 	public Date getDateExecuted() {
-		// TODO Auto-generated method stub
-		return null;
+		return changeSet.getDateExecuted();
 	}
 
 }
