@@ -17,6 +17,7 @@
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.viewers.ILabelProviderListener;
@@ -74,12 +75,15 @@ public class ChangeSetLabelProvider implements ITableLabelProvider {
 		// text = df.format(cs.getDateExecuted());
 		// }
 		// } else
-			if (element instanceof ChangeSetTreeItem) {
+		if (element instanceof ChangeSetTreeItem) {
 			ChangeSetTreeItem item = (ChangeSetTreeItem) element;
 			if (column == 0) {
 				text = item.getChangeLog();
 			} else if (column == 1) {
-				text = df.format(item.getDateExecuted());
+				Date dateExecuted = item.getDateExecuted();
+				if (dateExecuted != null) {
+					text = df.format(dateExecuted);
+				}
 			} else if (column == 2) {
 				IFile changeLogFile = item.getChangeLogFile();
 				if (changeLogFile != null) {

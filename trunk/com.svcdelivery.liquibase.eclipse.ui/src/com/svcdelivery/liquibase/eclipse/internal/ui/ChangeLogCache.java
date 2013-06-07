@@ -49,28 +49,10 @@ public class ChangeLogCache {
 	 */
 	private static final String FILENAME = "changelogs.properties";
 
-	// @Override
-	// public String toString() {
-	// StringBuilder sb = new StringBuilder();
-	// for (Map.Entry<IFile, DatabaseChangeLog> entry : logs.entrySet()) {
-	// IFile file = entry.getKey();
-	// sb.append(file.getProjectRelativePath().toPortableString());
-	// if (entry.getValue() != null) {
-	// sb.append(" (loaded)");
-	// }
-	// sb.append("\n");
-	// }
-	// return sb.toString();
-	// }
-
-	// private Map<String, IFile> pathToFile;
-
-	private Map<IFile, List<IFile>> imports;
-
 	/**
-	 * List of cached change logs.
+	 * Map of files to imports.
 	 */
-//	private Map<IFile, DatabaseChangeLog> logs;
+	private Map<IFile, List<IFile>> imports;
 
 	/**
 	 * Listeners for changes to the change log cache.
@@ -78,16 +60,10 @@ public class ChangeLogCache {
 	private Set<ChangeLogListener> listeners;
 
 	/**
-	 * Change log parser factory.
-	 */
-//	private final ChangeLogParserFactory factory;
-
-	/**
 	 * initialise the change log cache.
 	 */
 	public ChangeLogCache() {
 		listeners = new HashSet<ChangeLogListener>();
-//		factory = ChangeLogParserFactory.getInstance();
 		load();
 	}
 
@@ -99,19 +75,10 @@ public class ChangeLogCache {
 	}
 
 	/**
-	 * @param changeLogs
-	 *            The change logs to cache.
-	 */
-//	final void setChangeLogs(final Map<IFile, DatabaseChangeLog> changeLogs) {
-//		logs = changeLogs;
-//	}
-
-	/**
 	 * @param file
 	 *            the file to remove.
 	 */
 	public final void remove(final IFile file) {
-//		logs.remove(file);
 		imports.remove(file);
 		for (List<IFile> importList : imports.values()) {
 			if (importList != null) {
@@ -124,52 +91,22 @@ public class ChangeLogCache {
 	/**
 	 * @param file
 	 *            The file to add.
-	 * @param changeLog
-	 *            The changelog, or null to lazy load.
 	 * @throws CoreException
+	 *             If there was a problem adding the file.
 	 */
 	public final void add(final IFile file) throws CoreException {
 		if (file.exists() && "xml".equals(file.getFileExtension())) {
-			imports.put(file, new ArrayList<IFile>());
-//			DatabaseChangeLog changeLog = null;
-//			changeLog = loadChangeLog(file);
-//			if (changeLog != null) {
-//				logs.put(file, changeLog);
-				notifyChangeLogUpdated(file);
-//			}
+			ArrayList<IFile> imported = parseImports(file);
+			imports.put(file, imported);
+			notifyChangeLogUpdated(file);
 		}
 	}
 
-//	private DatabaseChangeLog loadChangeLog(final IFile file)
-//			throws CoreException {
-//		DatabaseChangeLog changeLog = null;
-//		final ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(
-//				file.getParent().getLocation().toString()) {
-//
-//			@Override
-//			public InputStream getResourceAsStream(String child)
-//					throws IOException {
-//				List<IFile> imported = imports.get(file);
-//				if (imported == null) {
-//					imported = new ArrayList<IFile>();
-//					imports.put(file, imported);
-//				}
-//				IFile childFile = file.getParent().getFile(new Path(child));
-//				imported.add(childFile);
-//				return super.getResourceAsStream(child);
-//			}
-//		};
-//		try {
-//			final ChangeLogParser parser = factory.getParser("xml",
-//					resourceAccessor);
-//			final ChangeLogParameters params = new ChangeLogParameters();
-//			changeLog = parser.parse(file.getName(), params, resourceAccessor);
-//		} catch (final ChangeLogParseException e) {
-//		} catch (final LiquibaseException e) {
-//			throw new CoreException(Status.CANCEL_STATUS);
-//		}
-//		return changeLog;
-//	}
+	private ArrayList<IFile> parseImports(final IFile file) {
+		ImportParser parser = new ImportParser(file);
+		ArrayList<IFile> imported = parser.getImports();
+		return imported;
+	}
 
 	/**
 	 * Load the cached data from storage.
@@ -208,14 +145,14 @@ public class ChangeLogCache {
 				}
 			}
 		}
-//		logs = new HashMap<IFile, DatabaseChangeLog>();
+		// logs = new HashMap<IFile, DatabaseChangeLog>();
 		imports = new HashMap<IFile, List<IFile>>();
 		Set<String> keys = properties.stringPropertyNames();
 		for (String key : keys) {
 			IPath path = Path.fromPortableString(key);
 			try {
 				IFile log = root.getFile(path);
-//				logs.put(log, null);
+				// logs.put(log, null);
 				String importList = properties.getProperty(key);
 				if (importList != null && !"-".equals(importList)) {
 					String[] importArray = importList.split(",");
@@ -352,32 +289,32 @@ public class ChangeLogCache {
 			IFile file = files.next();
 			if (project.equals(file.getProject())) {
 				files.remove();
-//				logs.remove(file);
+				// logs.remove(file);
 				notifyChangeLogRemoved(file);
 			}
 		}
 		persist();
 	}
 
-//	public DatabaseChangeLog getChangeLog(IFile file) {
-//		DatabaseChangeLog log = null;
-//		if (logs.containsKey(file)) {
-//			log = logs.get(file);
-//			if (log == null) {
-//				try {
-//					log = loadChangeLog(file);
-//					logs.put(file, log);
-//				} catch (CoreException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		}
-//		return log;
-//	}
+	// public DatabaseChangeLog getChangeLog(IFile file) {
+	// DatabaseChangeLog log = null;
+	// if (logs.containsKey(file)) {
+	// log = logs.get(file);
+	// if (log == null) {
+	// try {
+	// log = loadChangeLog(file);
+	// logs.put(file, log);
+	// } catch (CoreException e) {
+	// e.printStackTrace();
+	// }
+	// }
+	// }
+	// return log;
+	// }
 
 	public void clear() {
 		List<IFile> removed = new ArrayList<IFile>(imports.keySet());
-//		logs.clear();
+		// logs.clear();
 		imports.clear();
 		for (IFile next : removed) {
 			notifyChangeLogRemoved(next);
