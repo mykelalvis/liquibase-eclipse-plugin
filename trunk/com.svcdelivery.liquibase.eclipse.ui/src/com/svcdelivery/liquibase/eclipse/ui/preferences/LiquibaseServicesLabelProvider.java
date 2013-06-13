@@ -37,7 +37,7 @@ public class LiquibaseServicesLabelProvider implements ITableLabelProvider {
 			text = ref.getBundle().getSymbolicName();
 			Object versionProperty = ref.getProperty("version");
 			if (versionProperty != null) {
-				text = text + versionProperty.toString();
+				text = text + " " + versionProperty.toString();
 			}
 		}
 		return text;

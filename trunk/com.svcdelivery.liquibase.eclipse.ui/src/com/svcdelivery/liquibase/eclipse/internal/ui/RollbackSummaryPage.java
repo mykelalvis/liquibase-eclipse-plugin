@@ -76,7 +76,7 @@ public class RollbackSummaryPage extends WizardPage implements CompleteListener 
 	/**
 	 * Constructor for a known change set item.
 	 * 
-	 * @param file
+	 * @param rollbackFile
 	 *            The file to roll back.
 	 */
 	protected RollbackSummaryPage(final IFile rollbackFile) {

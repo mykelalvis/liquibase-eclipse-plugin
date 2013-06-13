@@ -201,7 +201,17 @@
                   label="%com.svcdelivery.liquibase.eclipse.reverse"
                   style="push">
                <visibleWhen
-                     checkEnabled="true">
+                     checkEnabled="false">
+                  <iterate
+                        ifEmpty="false"
+                        operator="and">
+                     <adapt
+                           type="org.eclipse.datatools.connectivity.IConnectionProfile">
+                        <instanceof
+                              value="org.eclipse.datatools.connectivity.IConnectionProfile">
+                        </instanceof>
+                     </adapt>
+                  </iterate>
                </visibleWhen>
             </command>
             <command
