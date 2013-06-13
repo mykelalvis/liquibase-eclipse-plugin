@@ -71,6 +71,13 @@ public class DataSourceViewPart extends ViewPart implements
 		dateColumn.setWidth(150);
 		typeColumn.setWidth(100);
 
+		dataSourcesTree.setHeaderVisible(true);
+		dataSourcesTree.setLinesVisible(true);
+		dataSources.setUseHashlookup(true);
+		dataSources.setContentProvider(new DataSourceContentProvider());
+		dataSources.setLabelProvider(new DataSourceLabelProvider());
+		dataSources.setInput(ProfileManager.getInstance());
+
 		getSite().setSelectionProvider(dataSources);
 
 		MenuManager mgr = new MenuManager();
@@ -115,12 +122,6 @@ public class DataSourceViewPart extends ViewPart implements
 		Menu menu = mgr.createContextMenu(dataSourcesTree);
 		dataSourcesTree.setMenu(menu);
 
-		dataSourcesTree.setHeaderVisible(true);
-		dataSourcesTree.setLinesVisible(true);
-		dataSources.setUseHashlookup(true);
-		dataSources.setContentProvider(new DataSourceContentProvider());
-		dataSources.setLabelProvider(new DataSourceLabelProvider());
-		dataSources.setInput(ProfileManager.getInstance());
 		Activator.getDefault().addDatabaseUpdateListener(this);
 	}
 
