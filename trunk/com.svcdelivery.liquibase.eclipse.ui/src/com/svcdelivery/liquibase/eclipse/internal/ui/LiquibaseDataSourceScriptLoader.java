@@ -59,14 +59,16 @@ public abstract class LiquibaseDataSourceScriptLoader {
 					if (connection != null) {
 						LiquibaseService liquibaseService = Activator
 								.getDefault().getActiveLiquibaseService();
-						try {
-							List<ChangeSetItem> ranChangeSets = liquibaseService
-									.getRanChangeSets(connection);
-							complete(ranChangeSets);
-							status = Status.OK_STATUS;
-						} catch (LiquibaseApiException e) {
-							status = new Status(Status.ERROR,
-									Activator.PLUGIN_ID, e.getMessage());
+						if (liquibaseService != null) {
+							try {
+								List<ChangeSetItem> ranChangeSets = liquibaseService
+										.getRanChangeSets(connection);
+								complete(ranChangeSets);
+								status = Status.OK_STATUS;
+							} catch (LiquibaseApiException e) {
+								status = new Status(Status.ERROR,
+										Activator.PLUGIN_ID, e.getMessage());
+							}
 						}
 					}
 				} finally {

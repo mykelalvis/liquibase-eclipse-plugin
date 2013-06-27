@@ -23,7 +23,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-import org.eclipse.wst.xml.core.internal.modelquery.XMLCatalogIdResolver;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
@@ -118,6 +117,8 @@ public class Activator extends AbstractUIPlugin {
 						LiquibaseService svc = null;
 						Integer serviceVersion = getServiceVersion(reference);
 						if (serviceVersion != null) {
+							System.out.println("Found service version "
+									+ serviceVersion);
 							Integer activeVersion = getServiceVersion(activeRef);
 							svc = context.getService(reference);
 							// If
@@ -130,6 +131,8 @@ public class Activator extends AbstractUIPlugin {
 							if ((defaultLiquibaseVersion != 0 && defaultLiquibaseVersion == serviceVersion)
 									|| activeRef == null
 									|| (activeVersion != null && serviceVersion > activeVersion)) {
+								System.out.println("Setting active version "
+										+ serviceVersion);
 								activeRef = reference;
 								active = svc;
 							}
@@ -316,7 +319,7 @@ public class Activator extends AbstractUIPlugin {
 	public ServiceReference<LiquibaseService> getActiveLiquibaseServiceReference() {
 		return activeRef;
 	}
-	
+
 	private void addSchema() {
 	}
 

@@ -46,12 +46,13 @@ public class LiquibasePreferencePage extends PreferencePage implements
 
 	@Override
 	public void init(IWorkbench workbench) {
-
 	}
 
 	@Override
-	protected Control createContents(Composite parent) {
+	protected Control createContents(final Composite parent) {
 		Composite root = new Composite(parent, SWT.NONE);
+		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
+		root.setLayoutData(data);
 		GridLayout layout = new GridLayout(2, false);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
@@ -64,8 +65,8 @@ public class LiquibasePreferencePage extends PreferencePage implements
 
 		versionViewer = new TableViewer(root);
 		Table versionTable = versionViewer.getTable();
-		versionTable.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
-				true));
+		versionTable
+				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		IContentProvider versionContentProvider = new CollectionContentProvider();
 		ITableLabelProvider versionLabelProvider = new LiquibaseServicesLabelProvider();
 		versionViewer.setContentProvider(versionContentProvider);
@@ -79,8 +80,10 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		activeService = Activator.getDefault()
 				.getActiveLiquibaseServiceReference();
 
-		ISelection selection = new StructuredSelection(activeService);
-		versionViewer.setSelection(selection, true);
+		if (activeService != null) {
+			ISelection selection = new StructuredSelection(activeService);
+			versionViewer.setSelection(selection, true);
+		}
 
 		return root;
 	}
