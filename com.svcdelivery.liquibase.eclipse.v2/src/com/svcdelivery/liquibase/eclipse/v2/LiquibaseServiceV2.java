@@ -11,6 +11,7 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import liquibase.Liquibase;
+import liquibase.change.CheckSum;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -43,7 +44,10 @@ public class LiquibaseServiceV2 implements LiquibaseService {
 				item.setDateExecuted(changeSet.getDateExecuted());
 				item.setExecType(changeSet.getExecType().name());
 				item.setId(changeSet.getId());
-				item.setLastCheckSum(changeSet.getLastCheckSum().toString());
+				CheckSum lastCheckSum = changeSet.getLastCheckSum();
+				if (lastCheckSum != null) {
+					item.setLastCheckSum(lastCheckSum.toString());
+				}
 				item.setTag(changeSet.getTag());
 				items.add(item);
 			}
