@@ -321,6 +321,10 @@
                uri="resources/dbchangelog-2.1.xsd">
          </system>
          <system
+               systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd"
+               uri="resources/dbchangelog-3.0.xsd">
+         </system>
+         <system
                systemId="http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
                uri="resources/dbchangelog-ext.xsd">
          </system>
