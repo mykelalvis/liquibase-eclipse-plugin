@@ -2,7 +2,7 @@
 <feature
       id="com.svcdelivery.liquibase.eclipse.feature"
       label="Liquibase Eclipse Feature"
-      version="1.1.0.qualifier"
+      version="1.2.0.qualifier"
       provider-name="SVC Delivery">
 
    <description>
@@ -229,30 +229,48 @@ limitations under the License.
    </license>
 
    <requires>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.datatools.connectivity"/>
-      <import plugin="org.eclipse.wst.xml.core"/>
-      <import plugin="org.liquibase.osgi" version="2.0.5" match="greaterOrEqual"/>
-      <import plugin="org.slf4j.api"/>
+      <import plugin="org.eclipse.ui" version="3.7.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.runtime" version="3.7.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.core.resources" version="3.7.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.datatools.connectivity" version="1.2.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.wst.xml.core" version="1.1.0" match="greaterOrEqual"/>
+      <import plugin="com.svcdelivery.liquibase.eclipse.api"/>
+      <import plugin="org.junit"/>
       <import plugin="org.eclipse.osgi"/>
       <import plugin="org.apache.ant"/>
       <import plugin="javax.servlet"/>
+      <import plugin="org.slf4j.api"/>
+      <import plugin="org.apache.commons.lang"/>
+      <import plugin="javax.persistence"/>
+      <import plugin="org.eclipse.jdt.debug"/>
    </requires>
 
    <plugin
          id="com.svcdelivery.liquibase.eclipse.ui"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.0.qualifier"
          unpack="false"/>
 
    <plugin
-         id="org.liquibase.osgi"
+         id="com.svcdelivery.liquibase.eclipse.v2"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="1.2.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="com.svcdelivery.liquibase.eclipse.v3"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.qualifier"
+         unpack="false"/>
+
+   <plugin
+         id="com.svcdelivery.liquibase.eclipse.api"
+         download-size="0"
+         install-size="0"
+         version="1.2.0.qualifier"
          unpack="false"/>
 
 </feature>

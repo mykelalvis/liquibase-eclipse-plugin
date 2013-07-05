@@ -2,19 +2,11 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Liquibase v3 Support
 Bundle-SymbolicName: com.svcdelivery.liquibase.eclipse.v3;singleton:=true
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: SVC Delivery
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.svcdelivery.liquibase.eclipse.api,
- liquibase;version="[3.0.0,4.0.0)",
- liquibase.change;version="[3.0.0,4.0.0)",
- liquibase.changelog;version="[3.0.0,4.0.0)",
- liquibase.database;version="[3.0.0,4.0.0)",
- liquibase.database.jvm;version="[3.0.0,4.0.0)",
- liquibase.diff;version="[3.0.0,4.0.0)",
- liquibase.diff.output;version="[3.0.0,4.0.0)",
- liquibase.diff.output.changelog;version="[3.0.0,4.0.0)",
- liquibase.exception;version="[3.0.0,4.0.0)",
- liquibase.resource;version="[3.0.0,4.0.0)"
+Import-Package: com.svcdelivery.liquibase.eclipse.api
 Service-Component: OSGI-INF/liquibasev3.xml
 Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: lib/liquibase.jar,
+ .

@@ -22,12 +22,35 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.servicelocator.CustomResolverServiceLocator;
+import liquibase.servicelocator.PackageScanClassResolver;
+import liquibase.servicelocator.ServiceLocator;
+
+import org.osgi.framework.BundleContext;
 
 import com.svcdelivery.liquibase.eclipse.api.ChangeSetItem;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 public class LiquibaseServiceV2 implements LiquibaseService {
+
+	/**
+	 * Service activator.
+	 * 
+	 * @param ctx
+	 *            The bundle context.
+	 */
+	public void activate(BundleContext ctx) {
+		PackageScanClassResolver resolver = new OSGIPackageScanClassResolver(
+				ctx.getBundle());
+
+		ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
+	}
+
+	public void deactivate(BundleContext ctx) {
+		ServiceLocator.reset();
+	}
+
 	@Override
 	public List<ChangeSetItem> getRanChangeSets(Connection connection)
 			throws LiquibaseApiException {
