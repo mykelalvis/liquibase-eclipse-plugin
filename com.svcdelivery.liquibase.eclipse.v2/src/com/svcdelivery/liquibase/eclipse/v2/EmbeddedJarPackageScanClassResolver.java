@@ -1,8 +1,18 @@
 /**
- * Licensed under same license as rest of project (Apache 2.0).
+ * Copyright 2012 Nick Wilson
  *
- * History:
- *  - github.com/samhendley - 1/31/12 : initial implementation, tested in karaf.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
  */
 package com.svcdelivery.liquibase.eclipse.v2;
 
@@ -18,23 +28,21 @@ import liquibase.servicelocator.PackageScanFilter;
 import org.osgi.framework.Bundle;
 
 /**
- * Package scan resolver that works with OSGI frameworks (in theory all of them)
+ * Package scan resolver.
  */
-public class OSGIPackageScanClassResolver extends
+public class EmbeddedJarPackageScanClassResolver extends
 		DefaultPackageScanClassResolver {
 
 	private final Bundle bundle;
 
-	public OSGIPackageScanClassResolver(Bundle bundle) {
+	public EmbeddedJarPackageScanClassResolver(Bundle bundle) {
 		this.bundle = bundle;
 	}
 
 	@Override
-	protected void find(PackageScanFilter test, String packageName,
+	protected void find(final PackageScanFilter test, final String packageName,
 			Set<Class<?>> classes) {
-		// FIXME Only scan the jar file once.
-		// FIXME Copy this to the v3 project.
-		packageName = packageName.replace('.', '/');
+		String packagePath = packageName.replace('.', '/');
 
 		URL url = bundle.getEntry("/lib/liquibase.jar");
 		try {
@@ -42,8 +50,8 @@ public class OSGIPackageScanClassResolver extends
 			JarEntry next;
 			while ((next = jis.getNextJarEntry()) != null) {
 				String name = next.getName();
-				if (name.startsWith(packageName)) {
-					String remaining = name.substring(packageName.length());
+				if (name.startsWith(packagePath)) {
+					String remaining = name.substring(packagePath.length());
 					if (remaining.startsWith("/")) {
 						remaining = remaining.substring(1);
 					}
@@ -53,8 +61,6 @@ public class OSGIPackageScanClassResolver extends
 						try {
 							Class<?> klass = bundle.loadClass(fixedName);
 							if (test.matches(klass)) {
-								System.out.println("Class matched: "
-										+ fixedName);
 								classes.add(klass);
 							}
 						} catch (ClassNotFoundException e) {

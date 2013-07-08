@@ -5,8 +5,10 @@ Bundle-SymbolicName: com.svcdelivery.liquibase.eclipse.v3;singleton:=true
 Bundle-Version: 1.2.0.qualifier
 Bundle-Vendor: SVC Delivery
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.svcdelivery.liquibase.eclipse.api
+Import-Package: com.svcdelivery.liquibase.eclipse.api,
+ org.osgi.framework
 Service-Component: OSGI-INF/liquibasev3.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/liquibase.jar,
- .
+ .,
+ lib/snakeyaml-1.12.jar
