@@ -4,5 +4,5 @@
    <service>
       <provide interface="com.svcdelivery.liquibase.eclipse.api.LiquibaseService"/>
    </service>
-   <property name="version" type="Integer" value="3"/>
+   <property name="version" type="String" value="3.0.1"/>
 </scr:component>
