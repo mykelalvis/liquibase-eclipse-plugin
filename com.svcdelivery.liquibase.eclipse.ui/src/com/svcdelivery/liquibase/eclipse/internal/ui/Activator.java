@@ -25,6 +25,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
@@ -52,7 +53,7 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * The version of the default liquibase service.
 	 */
-	private int defaultLiquibaseVersion;
+	private Version defaultLiquibaseVersion;
 
 	/**
 	 * The results from running the last changelog.
@@ -115,11 +116,11 @@ public class Activator extends AbstractUIPlugin {
 					public LiquibaseService addingService(
 							ServiceReference<LiquibaseService> reference) {
 						LiquibaseService svc = null;
-						Integer serviceVersion = getServiceVersion(reference);
+						Version serviceVersion = getServiceVersion(reference);
 						if (serviceVersion != null) {
 							System.out.println("Found service version "
 									+ serviceVersion);
-							Integer activeVersion = getServiceVersion(activeRef);
+							Version activeVersion = getServiceVersion(activeRef);
 							svc = context.getService(reference);
 							// If
 							// - This is the default
@@ -128,9 +129,11 @@ public class Activator extends AbstractUIPlugin {
 							// - OR (the active service is not the default AND
 							// this
 							// service has a higher version number)
-							if ((defaultLiquibaseVersion != 0 && defaultLiquibaseVersion == serviceVersion)
+							if ((defaultLiquibaseVersion != null && defaultLiquibaseVersion
+									.equals(serviceVersion))
 									|| activeRef == null
-									|| (activeVersion != null && serviceVersion > activeVersion)) {
+									|| (activeVersion != null && serviceVersion
+											.compareTo(activeVersion) > 0)) {
 								System.out.println("Setting active version "
 										+ serviceVersion);
 								activeRef = reference;
@@ -163,12 +166,20 @@ public class Activator extends AbstractUIPlugin {
 
 	private void readPreferences() {
 		IPreferenceStore store = getPreferenceStore();
-		defaultLiquibaseVersion = store.getInt(DEFAULT_SERVICE_VERSION);
+		String defaultVersionString = store.getString(DEFAULT_SERVICE_VERSION);
+		if (defaultVersionString != null && defaultVersionString.length() > 0) {
+			try {
+				defaultLiquibaseVersion = Version
+						.parseVersion(defaultVersionString);
+			} catch (IllegalArgumentException e) {
+			}
+		}
 	}
 
 	private void writePreferences() {
 		IPreferenceStore store = getPreferenceStore();
-		store.setValue(DEFAULT_SERVICE_VERSION, defaultLiquibaseVersion);
+		store.setValue(DEFAULT_SERVICE_VERSION,
+				defaultLiquibaseVersion.toString());
 	}
 
 	/**
@@ -293,8 +304,8 @@ public class Activator extends AbstractUIPlugin {
 
 	public final void setDefaultLiquibaseService(
 			ServiceReference<LiquibaseService> newDefaultLiquibaseService) {
-		Integer newVersion = getServiceVersion(newDefaultLiquibaseService);
-		defaultLiquibaseVersion = newVersion == null ? 0 : newVersion;
+		Version newVersion = getServiceVersion(newDefaultLiquibaseService);
+		defaultLiquibaseVersion = newVersion == null ? null : newVersion;
 		writePreferences();
 		setActiveLiquibaseService(newDefaultLiquibaseService);
 	}
@@ -304,13 +315,14 @@ public class Activator extends AbstractUIPlugin {
 	 *            The service reference.
 	 * @return The service version.
 	 */
-	private Integer getServiceVersion(
+	private Version getServiceVersion(
 			final ServiceReference<LiquibaseService> reference) {
-		Integer version = null;
+		Version version = null;
 		if (reference != null) {
 			Object property = reference.getProperty(VERSION);
-			if (property instanceof Integer) {
-				version = (Integer) reference.getProperty(VERSION);
+			if (property instanceof String) {
+				version = Version.parseVersion((String) reference
+						.getProperty(VERSION));
 			}
 		}
 		return version;
