@@ -50,10 +50,17 @@ public class LiquibaseServicesLabelProvider implements ITableLabelProvider {
 		String text = "---";
 		if (element instanceof ServiceReference) {
 			ServiceReference<?> ref = (ServiceReference<?>) element;
-			text = ref.getBundle().getSymbolicName();
-			Object versionProperty = ref.getProperty("version");
-			if (versionProperty != null) {
-				text = text + " version " + versionProperty.toString();
+			if (columnIndex == 0) {
+				text = ref.getBundle().getSymbolicName();
+			} else if (columnIndex == 1) {
+				Object versionProperty = ref.getProperty("version");
+				if (versionProperty != null) {
+					text = versionProperty.toString();
+				} else {
+					text = "Null version";
+				}
+			} else {
+				text = "Column invalid";
 			}
 		}
 		return text;

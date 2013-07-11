@@ -25,13 +25,14 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.osgi.framework.ServiceReference;
@@ -65,7 +66,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 	}
 
 	@Override
-	protected Control createContents(final Composite parent) {
+	protected final Control createContents(final Composite parent) {
 		Composite root = new Composite(parent, SWT.NONE);
 		GridData data = new GridData(SWT.FILL, SWT.FILL, true, true);
 		root.setLayoutData(data);
@@ -74,15 +75,25 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		layout.marginHeight = 0;
 		root.setLayout(layout);
 
-		Text versionLabel = new Text(root, SWT.NONE);
+		Label versionLabel = new Label(root, SWT.NONE);
 		versionLabel.setText("Liqubase Version:");
-		versionLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false,
-				false));
+		versionLabel
+				.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 
-		versionViewer = new TableViewer(root);
+		versionViewer = new TableViewer(root, SWT.FULL_SELECTION | SWT.BORDER
+				| SWT.FLAT);
 		Table versionTable = versionViewer.getTable();
 		versionTable
 				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		TableViewerColumn providerColumn = new TableViewerColumn(versionViewer,
+				SWT.NONE);
+		providerColumn.getColumn().setWidth(220);
+		providerColumn.getColumn().setText("Provider");
+		TableViewerColumn versionColumn = new TableViewerColumn(versionViewer,
+				SWT.NONE);
+		versionColumn.getColumn().setWidth(100);
+		versionColumn.getColumn().setText("Version");
+		versionTable.setHeaderVisible(true);
 		IContentProvider versionContentProvider = new CollectionContentProvider();
 		ITableLabelProvider versionLabelProvider = new LiquibaseServicesLabelProvider();
 		versionViewer.setContentProvider(versionContentProvider);
@@ -100,6 +111,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 			ISelection selection = new StructuredSelection(activeService);
 			versionViewer.setSelection(selection, true);
 		}
+		applyDialogFont(root);
 
 		return root;
 	}
@@ -114,6 +126,12 @@ public class LiquibasePreferencePage extends PreferencePage implements
 			Activator.getDefault().setDefaultLiquibaseService(svc);
 		}
 		return super.performOk();
+	}
+
+	@Override
+	protected void performDefaults() {
+		ISelection selection = new StructuredSelection(activeService);
+		versionViewer.setSelection(selection);
 	}
 
 }
