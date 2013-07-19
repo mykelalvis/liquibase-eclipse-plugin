@@ -16,16 +16,14 @@
  */
 package com.svcdelivery.liquibase.eclipse.v3;
 
-import java.io.IOException;
-import java.net.URL;
 import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 
 import liquibase.servicelocator.DefaultPackageScanClassResolver;
 import liquibase.servicelocator.PackageScanFilter;
 
 import org.osgi.framework.Bundle;
+
+import com.svcdelivery.liquibase.eclipse.api.JarClassIndexer;
 
 /**
  * Package scan resolver.
@@ -35,51 +33,29 @@ public class EmbeddedJarPackageScanClassResolver extends
 
 	private final Bundle bundle;
 
+	private final JarClassIndexer indexer;
+
 	public EmbeddedJarPackageScanClassResolver(Bundle bundle) {
 		this.bundle = bundle;
+		indexer = new JarClassIndexer();
+		indexer.addJar(bundle.getEntry("/lib/liquibase.jar"));
+		indexer.addJar(bundle.getEntry("/lib/snakeyaml-1.12.jar"));
 	}
 
 	@Override
 	protected void find(final PackageScanFilter test, final String packageName,
 			final Set<Class<?>> classes) {
-		String packagePath = packageName.replace('.', '/');
-
-		scanJar(test, classes, packagePath, "/lib/liquibase.jar");
-		scanJar(test, classes, packagePath, "/lib/snakeyaml-1.12.jar");
-
-	}
-
-	private void scanJar(final PackageScanFilter test,
-			final Set<Class<?>> classes, String packagePath, String jarfile) {
-		URL url = bundle.getEntry(jarfile);
-		try {
-			JarInputStream jis = new JarInputStream(url.openStream());
-			JarEntry next;
-			while ((next = jis.getNextJarEntry()) != null) {
-				String name = next.getName();
-				if (name.startsWith(packagePath)) {
-					String remaining = name.substring(packagePath.length());
-					if (remaining.startsWith("/")) {
-						remaining = remaining.substring(1);
-					}
-					if (remaining.endsWith(".class")) {
-						String fixedName = name.substring(0, name.indexOf('.'))
-								.replace('/', '.');
-						try {
-							Class<?> klass = bundle.loadClass(fixedName);
-							if (test.matches(klass)) {
-								classes.add(klass);
-							}
-						} catch (ClassNotFoundException e) {
-							e.printStackTrace();
-						}
-
-					}
+		Set<String> classNames = indexer.getClasses(packageName, true);
+		for (String className : classNames) {
+			try {
+				Class<?> klass = bundle.loadClass(className);
+				if (test.matches(klass)) {
+					classes.add(klass);
 				}
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
-			jis.close();
-		} catch (IOException e) {
-
 		}
 	}
+
 }
