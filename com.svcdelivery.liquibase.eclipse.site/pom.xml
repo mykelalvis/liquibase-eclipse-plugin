@@ -25,7 +25,7 @@
 						<configuration>
 							<source>
 								<repository>
-									<url>${project.build.directory}/repository</url>
+									<url>${project.baseUri}/target/repository</url>
 								</repository>
 							</source>
 							<append>true</append>
