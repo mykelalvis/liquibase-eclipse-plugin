@@ -133,7 +133,9 @@ public class Activator extends AbstractUIPlugin {
 									.equals(serviceVersion))
 									|| activeRef == null
 									|| (activeVersion != null && serviceVersion
-											.compareTo(activeVersion) > 0)) {
+											.compareTo(activeVersion) > 0)
+									&& (defaultLiquibaseVersion == null || !defaultLiquibaseVersion
+											.equals(activeVersion))) {
 								System.out.println("Setting active version "
 										+ serviceVersion);
 								activeRef = reference;
