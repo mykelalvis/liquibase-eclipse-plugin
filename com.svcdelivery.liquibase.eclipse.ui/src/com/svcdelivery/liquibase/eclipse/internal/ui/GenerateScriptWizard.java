@@ -3,6 +3,7 @@ package com.svcdelivery.liquibase.eclipse.internal.ui;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -50,12 +51,13 @@ public class GenerateScriptWizard extends Wizard {
 		Job job = new Job("Generate Script") {
 
 			@Override
-			protected IStatus run(IProgressMonitor monitor) {
+			protected IStatus run(final IProgressMonitor monitor) {
 				IConnectionProfile profile = dataSourcePage.getProfile();
 				final Connection connection = ConnectionUtil
 						.getConnection(profile);
-				final IFile target = targetFilePage.getTargetContainer()
-						.getFile(new Path(targetFilePage.getFilename()));
+				IContainer parent = targetFilePage.getTargetContainer();
+				final IFile target = parent.getFile(new Path(targetFilePage
+						.getFilename()));
 				if (connection != null) {
 					try {
 						final javax.transaction.UserTransaction ut = UserTransaction
@@ -67,6 +69,7 @@ public class GenerateScriptWizard extends Wizard {
 							ls.diff(connection, schemaPickerPage.getSchema(),
 									target.getLocation().toFile());
 							ut.commit();
+							target.refreshLocal(IResource.DEPTH_ZERO, null);
 						} catch (final LiquibaseApiException e) {
 							e.printStackTrace();
 							ut.rollback();

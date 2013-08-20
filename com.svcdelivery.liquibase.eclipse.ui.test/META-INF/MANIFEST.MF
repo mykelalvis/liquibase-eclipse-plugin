@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Liquibase Eclipse plugin Tests
 Bundle-SymbolicName: com.svcdelivery.liquibase.eclipse.ui.test
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.2.1.qualifier
 Bundle-Vendor: SVC Delivery
 Fragment-Host: com.svcdelivery.liquibase.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6

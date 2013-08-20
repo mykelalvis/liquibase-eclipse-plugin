@@ -18,6 +18,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.LiquibaseException;
@@ -26,6 +27,9 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.CustomResolverServiceLocator;
 import liquibase.servicelocator.PackageScanClassResolver;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 
 import org.osgi.framework.BundleContext;
 
@@ -116,8 +120,36 @@ public class LiquibaseServiceV3 implements LiquibaseService {
 			final DatabaseConnection database = new JdbcConnection(connection);
 			Database targetDb = DatabaseFactory.getInstance()
 					.findCorrectDatabaseImplementation(database);
-			DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(
-					targetDb, null, null);
+
+			String snapshotTypes = null;
+			SnapshotControl snapshotControl = new SnapshotControl(targetDb,
+					snapshotTypes);
+			CompareControl compareControl = new CompareControl(
+					new CompareControl.SchemaComparison[] { new CompareControl.SchemaComparison(
+							new CatalogAndSchema(null, schema),
+							new CatalogAndSchema(null, schema)) },
+					snapshotTypes);
+
+			// diffOutputControl.setDataDir(dataDir);
+
+			DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory
+					.getInstance()
+					.createSnapshot(
+							compareControl
+									.getSchemas(CompareControl.DatabaseRole.REFERENCE),
+							targetDb, snapshotControl);
+			DiffResult diffResult = DiffGeneratorFactory
+					.getInstance()
+					.compare(
+							originalDatabaseSnapshot,
+							SnapshotGeneratorFactory
+									.getInstance()
+									.createSnapshot(
+											compareControl
+													.getSchemas(CompareControl.DatabaseRole.REFERENCE),
+											null, snapshotControl),
+							compareControl);
+
 			if (target.exists()) {
 				target.delete();
 			}

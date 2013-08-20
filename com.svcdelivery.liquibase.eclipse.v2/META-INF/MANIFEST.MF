@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Liquibase v2 Support
 Bundle-SymbolicName: com.svcdelivery.liquibase.eclipse.v2;singleton:=true
-Bundle-Version: 1.2.0.qualifier
+Bundle-Version: 1.2.1.qualifier
 Bundle-Vendor: SVC Delivery
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.svcdelivery.liquibase.eclipse.api,
