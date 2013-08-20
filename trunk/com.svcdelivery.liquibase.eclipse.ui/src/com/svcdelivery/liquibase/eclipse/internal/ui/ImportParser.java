@@ -56,9 +56,11 @@ public class ImportParser extends DefaultHandler {
 			Attributes attributes) throws SAXException {
 		if ("include".equals(qName)) {
 			String included = attributes.getValue("file");
-			IPath path = new Path(included);
-			IFile includedFile = file.getParent().getFile(path);
-			imports.add(includedFile);
+			if (included != null) {
+				IPath path = new Path(included);
+				IFile includedFile = file.getParent().getFile(path);
+				imports.add(includedFile);
+			}
 		}
 	}
 
