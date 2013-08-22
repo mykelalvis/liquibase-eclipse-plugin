@@ -6,5 +6,7 @@ Bundle-Version: 1.2.1.qualifier
 Bundle-Vendor: SVC Delivery
 Fragment-Host: com.svcdelivery.liquibase.eclipse.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: org.junit;version="4.8.0",
+Import-Package: org.eclipse.swtbot.swt.finder,
+ org.eclipse.swtbot.swt.finder.junit,
+ org.junit;version="4.8.0",
  org.junit.runner;version="4.8.0"
