@@ -27,8 +27,11 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -103,6 +106,16 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		if (liquibaseServices != null) {
 			versionViewer.setInput(Arrays.asList(liquibaseServices));
 		}
+
+//		Button download = new Button(root, SWT.PUSH);
+//		download.setText("Download");
+//		download.addSelectionListener(new SelectionAdapter() {
+//
+//			@Override
+//			public void widgetSelected(SelectionEvent e) {
+//				// Show download wizard
+//			}
+//		});
 
 		activeService = Activator.getDefault()
 				.getActiveLiquibaseServiceReference();
