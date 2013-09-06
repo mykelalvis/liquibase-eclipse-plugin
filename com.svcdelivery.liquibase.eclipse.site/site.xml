@@ -4,7 +4,7 @@
    <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.2.0.201307161309.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.2.0.201307161309">
       <category name="com.svcdelivery.liquibase.eclipse"/>
    </feature>
-   <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.2.1.201308221249.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.2.1.201308221249">
+   <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.2.1.201309060948.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.2.1.201309060948" patch="true">
       <category name="com.svcdelivery.liquibase.eclipse"/>
    </feature>
    <category-def name="com.svcdelivery.liquibase.eclipse" label="Liquibase Eclipse"/>

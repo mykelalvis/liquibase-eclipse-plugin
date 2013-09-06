@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.2.0.qualifier.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.2.0.qualifier">
-      <category name="com.svcdelivery.liquibase.eclipse"/>
-   </feature>
    <feature url="features/com.svcdelivery.liquibase.eclipse.feature_1.2.1.qualifier.jar" id="com.svcdelivery.liquibase.eclipse.feature" version="1.2.1.qualifier">
       <category name="com.svcdelivery.liquibase.eclipse"/>
    </feature>
