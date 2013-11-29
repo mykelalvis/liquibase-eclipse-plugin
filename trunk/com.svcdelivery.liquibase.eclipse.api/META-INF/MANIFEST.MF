@@ -6,3 +6,4 @@ Bundle-Version: 1.2.1.qualifier
 Bundle-Vendor: SVC Delivery
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.svcdelivery.liquibase.eclipse.api
+Import-Package: org.osgi.framework;version="1.7.0"

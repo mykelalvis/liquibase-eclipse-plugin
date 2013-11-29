@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.svcdelivery</groupId>
 	<artifactId>com.svcdelivery.liquibase.eclipse</artifactId>
-	<version>1.2.1</version>
+	<version>1.2.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
 		<tycho-version>0.18.1</tycho-version>
@@ -72,7 +72,7 @@
 		<module>../com.svcdelivery.liquibase.eclipse.feature</module>
 		<module>../com.svcdelivery.liquibase.eclipse.site</module>
 		<module>../com.svcdelivery.liquibase.eclipse.ui</module>
-		<module>../com.svcdelivery.liquibase.eclipse.ui.test</module>
+		<!--module>../com.svcdelivery.liquibase.eclipse.ui.test</module-->
 		<module>../com.svcdelivery.liquibase.eclipse.v2</module>
 		<module>../com.svcdelivery.liquibase.eclipse.v3</module>
 	</modules>
