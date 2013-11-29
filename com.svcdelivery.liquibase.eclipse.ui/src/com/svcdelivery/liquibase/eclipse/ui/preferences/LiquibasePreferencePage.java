@@ -22,10 +22,13 @@ import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -43,6 +46,7 @@ import org.osgi.framework.ServiceReference;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 import com.svcdelivery.liquibase.eclipse.internal.ui.Activator;
 import com.svcdelivery.liquibase.eclipse.internal.ui.CollectionContentProvider;
+import com.svcdelivery.liquibase.eclipse.internal.ui.version.AddVersionWizard;
 
 /**
  * @author nick
@@ -52,6 +56,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 
 	private ServiceReference<LiquibaseService> activeService;
 	private TableViewer versionViewer;
+	private TableViewer serviceViewer;
 
 	public LiquibasePreferencePage() {
 	}
@@ -107,15 +112,41 @@ public class LiquibasePreferencePage extends PreferencePage implements
 			versionViewer.setInput(Arrays.asList(liquibaseServices));
 		}
 
-//		Button download = new Button(root, SWT.PUSH);
-//		download.setText("Download");
-//		download.addSelectionListener(new SelectionAdapter() {
-//
-//			@Override
-//			public void widgetSelected(SelectionEvent e) {
-//				// Show download wizard
-//			}
-//		});
+		Label serviceLabel = new Label(root, SWT.NONE);
+		serviceLabel.setText("Additional Services:");
+		serviceLabel
+				.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+		serviceViewer = new TableViewer(root, SWT.FULL_SELECTION | SWT.BORDER
+				| SWT.FLAT);
+
+		Button add = new Button(root, SWT.PUSH);
+		add.setText("Add");
+		add.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(final SelectionEvent e) {
+				// Show Add Version wizard
+				AddVersionWizard addVersion = new AddVersionWizard();
+				WizardDialog dialog = new WizardDialog(getShell(), addVersion);
+				dialog.open();
+			}
+		});
+
+		versionViewer
+				.addSelectionChangedListener(new ISelectionChangedListener() {
+
+					@Override
+					public void selectionChanged(SelectionChangedEvent event) {
+						ISelection selection = event.getSelection();
+						if (selection instanceof StructuredSelection) {
+							StructuredSelection ss = (StructuredSelection) selection;
+							if (ss.size() == 1) {
+								Object item = ss.getFirstElement();
+								serviceViewer.setInput(item);
+							}
+						}
+					}
+				});
 
 		activeService = Activator.getDefault()
 				.getActiveLiquibaseServiceReference();
