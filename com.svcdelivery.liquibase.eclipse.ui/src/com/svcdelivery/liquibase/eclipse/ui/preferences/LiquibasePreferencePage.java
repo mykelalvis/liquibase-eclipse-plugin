@@ -118,6 +118,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 				.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		serviceViewer = new TableViewer(root, SWT.FULL_SELECTION | SWT.BORDER
 				| SWT.FLAT);
+		serviceViewer.setContentProvider(new CollectionContentProvider());
 
 		Button add = new Button(root, SWT.PUSH);
 		add.setText("Add");
@@ -128,6 +129,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 				// Show Add Version wizard
 				AddVersionWizard addVersion = new AddVersionWizard();
 				WizardDialog dialog = new WizardDialog(getShell(), addVersion);
+				dialog.setPageSize(400, 400);
 				dialog.open();
 			}
 		});

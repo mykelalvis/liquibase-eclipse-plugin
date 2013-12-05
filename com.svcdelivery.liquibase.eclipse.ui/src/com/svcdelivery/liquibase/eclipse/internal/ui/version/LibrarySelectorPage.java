@@ -16,15 +16,22 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui.version;
 
-import org.eclipse.jface.viewers.ComboViewer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.framework.Version;
 
 /**
  * @author nick
@@ -33,7 +40,11 @@ public class LibrarySelectorPage extends WizardPage {
 
 	private Text url;
 
-	private ComboViewer apiVersion;
+	private Text versionText;
+
+	private List<URL> urls;
+
+	private Version version;
 
 	/**
 	 * Constructor.
@@ -42,23 +53,56 @@ public class LibrarySelectorPage extends WizardPage {
 		super("Select Library");
 		setTitle("Select Library");
 		setMessage("Enter the URL of a Liquibase jar file and specify the API version that it implements.");
+		urls = new ArrayList<URL>();
 	}
 
 	@Override
 	public void createControl(Composite parent) {
 		final Composite root = new Composite(parent, SWT.NONE);
-		root.setLayout(new GridLayout(2, false));
+		root.setLayout(new GridLayout(4, false));
 
 		Label urlLabel = new Label(root, SWT.NONE);
 		urlLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 		url = new Text(root, SWT.NONE);
 		url.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		Button browse = new Button(root, SWT.PUSH);
+		browse.setText("File");
+		browse.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
+		
+		Button add = new Button(root, SWT.PUSH);
+		add.setText("Add");
+		add.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
-		Label apiLabel = new Label(root, SWT.NONE);
-		apiLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
-		apiVersion = new ComboViewer(root, SWT.NONE);
-		apiVersion.getCombo().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
-		apiVersion.setContentProvider(new ApiVersionContentProvider());
+		Label versionLabel = new Label(root, SWT.NONE);
+		versionLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false,
+				false));
+		versionText = new Text(root, SWT.NONE);
+		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
+				3, 1));
+		
+		add.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				String text = url.getText();
+				try {
+					URL lib = new URL(text);
+					urls.add(lib);
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+				}
+			}
+			
+		});
+		
+		setControl(root);
 	}
 
+	public URL[] getURLs() {
+		return urls.toArray(new URL[urls.size()]);
+	}
+
+	public Version getVersion() {
+		return version;
+	}
 }

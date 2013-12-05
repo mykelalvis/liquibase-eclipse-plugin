@@ -26,9 +26,11 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
+import org.osgi.framework.VersionRange;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
 /**
@@ -44,6 +46,8 @@ public class Activator extends AbstractUIPlugin {
 	private static final String DEFAULT_SERVICE_VERSION = "default-liquibase-service";
 
 	protected static final String VERSION = "version";
+
+	protected static final String COMPATIBILITY = "compatibility";
 
 	/**
 	 * The shared instance.
@@ -74,6 +78,11 @@ public class Activator extends AbstractUIPlugin {
 	 * Liquibase service tracker.
 	 */
 	private ServiceTracker<LiquibaseService, LiquibaseService> lbst;
+
+	/**
+	 * Liquibase service tracker.
+	 */
+	private ServiceTracker<LiquibaseProvider, LiquibaseProvider> lbpt;
 
 	/**
 	 * Reference to the active service.
@@ -164,6 +173,9 @@ public class Activator extends AbstractUIPlugin {
 					}
 				});
 		lbst.open();
+		lbpt = new ServiceTracker<LiquibaseProvider, LiquibaseProvider>(
+				context, LiquibaseProvider.class, null);
+		lbpt.open();
 	}
 
 	private void readPreferences() {
@@ -204,6 +216,7 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	@Override
 	public final void stop(final BundleContext context) throws Exception {
+		lbpt.close();
 		lbst.close();
 		setActiveLiquibaseService(null);
 		plugin = null;
@@ -319,12 +332,39 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	private Version getServiceVersion(
 			final ServiceReference<LiquibaseService> reference) {
+		return getServiceVersionProperty(reference, VERSION);
+	}
+
+	/**
+	 * @param reference
+	 *            The service reference.
+	 * @return The service version.
+	 */
+	private Version getServiceVersionProperty(
+			final ServiceReference<?> reference, String key) {
 		Version version = null;
 		if (reference != null) {
-			Object property = reference.getProperty(VERSION);
+			Object property = reference.getProperty(key);
 			if (property instanceof String) {
 				version = Version.parseVersion((String) reference
-						.getProperty(VERSION));
+						.getProperty(key));
+			}
+		}
+		return version;
+	}
+
+	/**
+	 * @param reference
+	 *            The service reference.
+	 * @return The service version.
+	 */
+	private VersionRange getServiceVersionRangeProperty(
+			final ServiceReference<?> reference, String key) {
+		VersionRange version = null;
+		if (reference != null) {
+			Object property = reference.getProperty(key);
+			if (property instanceof String) {
+				version = new VersionRange((String) reference.getProperty(key));
 			}
 		}
 		return version;
@@ -334,7 +374,20 @@ public class Activator extends AbstractUIPlugin {
 		return activeRef;
 	}
 
-	private void addSchema() {
+	public ServiceReference<LiquibaseProvider> getLiquibaseProvider(
+			Version version) {
+		ServiceReference<LiquibaseProvider> provider = null;
+		ServiceReference<LiquibaseProvider>[] references = lbpt
+				.getServiceReferences();
+		for (ServiceReference<LiquibaseProvider> reference : references) {
+			VersionRange range = getServiceVersionRangeProperty(reference,
+					COMPATIBILITY);
+			if (range != null && range.includes(version)) {
+				provider = reference;
+				break;
+			}
+		}
+		return provider;
 	}
 
 }

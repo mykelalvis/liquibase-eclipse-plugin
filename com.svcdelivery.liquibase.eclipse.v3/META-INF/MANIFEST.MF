@@ -7,7 +7,8 @@ Bundle-Vendor: SVC Delivery
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.svcdelivery.liquibase.eclipse.api,
  org.osgi.framework
-Service-Component: OSGI-INF/liquibasev3.xml
+Service-Component: OSGI-INF/liquibasev3.xml,
+ OSGI-INF/liquibaseProviderV3.xml
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/liquibase.jar,
  .,
