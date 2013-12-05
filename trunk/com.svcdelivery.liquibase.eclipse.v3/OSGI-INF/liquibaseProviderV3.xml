@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scr:component xmlns:scr="http://www.osgi.org/xmlns/scr/v1.1.0" name="com.svcdelivery.liquibase.eclipse.v3.provider">
+   <implementation class="com.svcdelivery.liquibase.eclipse.v3.LiquibaseProviderV3"/>
+   <service>
+      <provide interface="com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider"/>
+   </service>
+   <property name="version" type="String" value="3.0"/>
+</scr:component>
