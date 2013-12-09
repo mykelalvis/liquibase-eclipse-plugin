@@ -24,6 +24,7 @@ public class AddVersionWizard extends Wizard {
 	@Override
 	public boolean performFinish() {
 		boolean success = false;
+		libarySelectorPage.setErrorMessage(null);
 		URL[] urls = libarySelectorPage.getURLs();
 		Version version = libarySelectorPage.getVersion();
 		Activator activator = Activator.getDefault();
@@ -36,15 +37,25 @@ public class AddVersionWizard extends Wizard {
 				provider = ctx.getService(providerRef);
 				if (provider != null) {
 					provider.registerLibrary(urls, version);
+				} else {
+					libarySelectorPage
+							.setErrorMessage("Provider unavailable for version "
+									+ version);
 				}
 			} catch (LiquibaseApiException e) {
 				e.printStackTrace();
+				libarySelectorPage
+						.setErrorMessage("Error registering library for version "
+								+ version);
 			} finally {
 				if (provider != null) {
 					ctx.ungetService(providerRef);
 				}
 			}
-		}//TODO errors
+		} else {
+			libarySelectorPage.setErrorMessage("No provider found for version "
+					+ version);
+		}
 		return success;
 	}
 

@@ -28,7 +28,7 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 	@Override
 	public void registerLibrary(URL[] libraries, Version version)
 			throws LiquibaseApiException {
-		ClassLoader cl = new URLClassLoader(libraries);
+		ClassLoader cl = new GenericLibraryClassLoader(ctx, libraries);
 		try {
 			Class<?> c = cl.loadClass(LiquibaseServiceV3.class.getName());
 			if (LiquibaseService.class.isAssignableFrom(c)) {
@@ -41,7 +41,7 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 				register.put(version, reg);
 			}
 		} catch (ClassNotFoundException e) {
-			throw new LiquibaseApiException(e.getMessage());
+			throw new LiquibaseApiException("Class not found " + e.getMessage());
 		} catch (InstantiationException e) {
 			throw new LiquibaseApiException(e.getMessage());
 		} catch (IllegalAccessException e) {
