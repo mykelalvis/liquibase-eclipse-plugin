@@ -23,6 +23,8 @@ import java.util.List;
 
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -68,7 +70,7 @@ public class LibrarySelectorPage extends WizardPage {
 		Button browse = new Button(root, SWT.PUSH);
 		browse.setText("File");
 		browse.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
-		
+
 		Button add = new Button(root, SWT.PUSH);
 		add.setText("Add");
 		add.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -79,9 +81,9 @@ public class LibrarySelectorPage extends WizardPage {
 		versionText = new Text(root, SWT.NONE);
 		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
 				3, 1));
-		
+
 		add.addSelectionListener(new SelectionAdapter() {
-			
+
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				String text = url.getText();
@@ -92,9 +94,23 @@ public class LibrarySelectorPage extends WizardPage {
 					e1.printStackTrace();
 				}
 			}
-			
+
 		});
-		
+		versionText.addModifyListener(new ModifyListener() {
+
+			@Override
+			public void modifyText(ModifyEvent event) {
+				String txt = versionText.getText();
+				if (txt != null) {
+					try {
+						version = new Version(txt);
+					} catch (IllegalArgumentException e) {
+						version = null;
+					}
+				}
+			}
+		});
+
 		setControl(root);
 	}
 
