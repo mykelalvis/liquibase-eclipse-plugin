@@ -16,9 +16,21 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
@@ -30,6 +42,7 @@ import org.osgi.framework.VersionRange;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 
@@ -174,7 +187,38 @@ public class Activator extends AbstractUIPlugin {
 				});
 		lbst.open();
 		lbpt = new ServiceTracker<LiquibaseProvider, LiquibaseProvider>(
-				context, LiquibaseProvider.class, null);
+				context,
+				LiquibaseProvider.class,
+				new ServiceTrackerCustomizer<LiquibaseProvider, LiquibaseProvider>() {
+
+					@Override
+					public LiquibaseProvider addingService(
+							ServiceReference<LiquibaseProvider> reference) {
+						VersionRange range = getServiceVersionRangeProperty(
+								reference, COMPATIBILITY);
+						registerLibraries(range);
+						return context.getService(reference);
+					}
+
+					@Override
+					public void modifiedService(
+							ServiceReference<LiquibaseProvider> reference,
+							LiquibaseProvider service) {
+						VersionRange range = getServiceVersionRangeProperty(
+								reference, COMPATIBILITY);
+						unregisterLibraries(range);
+						registerLibraries(range);
+					}
+
+					@Override
+					public void removedService(
+							ServiceReference<LiquibaseProvider> reference,
+							LiquibaseProvider service) {
+						VersionRange range = getServiceVersionRangeProperty(
+								reference, COMPATIBILITY);
+						unregisterLibraries(range);
+					}
+				});
 		lbpt.open();
 	}
 
@@ -390,4 +434,138 @@ public class Activator extends AbstractUIPlugin {
 		return provider;
 	}
 
+	public String storeDescriptor(Version version, URL[] urls) {
+		String error = null;
+		StringBuilder sb = new StringBuilder();
+		for (URL url : urls) {
+			if (sb.length() != 0) {
+				sb.append(",");
+			}
+			sb.append(url.toString());
+		}
+		Properties vp = getVersionProprties();
+		vp.put(version.toString(), sb.toString());
+		try {
+			vp.store(new FileWriter(getVersionPropertiesFile()), "");
+			error = registerLibrary(version, urls);
+		} catch (IOException e) {
+			error = e.getMessage();
+			e.printStackTrace();
+		}
+		return error;
+	}
+
+	private Properties getVersionProprties() {
+		File file = getVersionPropertiesFile();
+		Properties properties = new Properties();
+		if (file.exists()) {
+			try {
+				properties.load(new FileReader(file));
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		return properties;
+	}
+
+	private File getVersionPropertiesFile() {
+		IPath path = getStateLocation().append("version.properties");
+		File file = path.toFile();
+		return file;
+	}
+
+	private void registerLibraries(VersionRange range) {
+		Map<Version, URL[]> versions = getCompatiblieLibraries(range);
+		for (Entry<Version, URL[]> entry : versions.entrySet()) {
+			Version version = entry.getKey();
+			URL[] urls = entry.getValue();
+			registerLibrary(version, urls);
+		}
+	}
+
+	private void unregisterLibraries(VersionRange range) {
+		Map<Version, URL[]> versions = getCompatiblieLibraries(range);
+		for (Version version : versions.keySet()) {
+			unregisterLibrary(version);
+		}
+	}
+
+	private Map<Version, URL[]> getCompatiblieLibraries(VersionRange range) {
+		Map<Version, URL[]> versions = new HashMap<Version, URL[]>();
+		Properties properties = getVersionProprties();
+		for (Entry<Object, Object> entry : properties.entrySet()) {
+			String key = (String) entry.getKey();
+			String value = (String) entry.getValue();
+			Version version = new Version(key);
+			if (range.includes(version)) {
+				String[] values = value.split(",");
+				URL[] urls = new URL[values.length];
+				for (int i = 0; i < values.length; i++) {
+					try {
+						urls[i] = new URL(values[i]);
+					} catch (MalformedURLException e) {
+						e.printStackTrace();
+					}
+				}
+				versions.put(version, urls);
+			}
+		}
+		return versions;
+	}
+
+	private String registerLibrary(Version version, URL[] urls) {
+		String error = null;
+		ServiceReference<LiquibaseProvider> providerRef = getLiquibaseProvider(version);
+		if (providerRef != null) {
+			BundleContext ctx = getBundle().getBundleContext();
+			LiquibaseProvider provider = null;
+			try {
+				provider = ctx.getService(providerRef);
+				if (provider != null) {
+					provider.registerLibrary(version, urls);
+				} else {
+					error = "Provider unavailable for version " + version;
+				}
+			} catch (LiquibaseApiException e) {
+				e.printStackTrace();
+				error = "Error registering library for version " + version;
+			} finally {
+				if (provider != null) {
+					ctx.ungetService(providerRef);
+				}
+			}
+		} else {
+			error = "No provider found for version " + version;
+		}
+		return error;
+	}
+
+	private String unregisterLibrary(Version version) {
+		String error = null;
+		ServiceReference<LiquibaseProvider> providerRef = getLiquibaseProvider(version);
+		if (providerRef != null) {
+			BundleContext ctx = getBundle().getBundleContext();
+			LiquibaseProvider provider = null;
+			try {
+				provider = ctx.getService(providerRef);
+				if (provider != null) {
+					provider.unregisterLibrary(version);
+				} else {
+					error = "Provider unavailable for version " + version;
+				}
+			} catch (LiquibaseApiException e) {
+				e.printStackTrace();
+				error = "Error unregistering library for version " + version;
+			} finally {
+				if (provider != null) {
+					ctx.ungetService(providerRef);
+				}
+			}
+		} else {
+			error = "No provider found for version " + version;
+		}
+		return error;
+	}
 }

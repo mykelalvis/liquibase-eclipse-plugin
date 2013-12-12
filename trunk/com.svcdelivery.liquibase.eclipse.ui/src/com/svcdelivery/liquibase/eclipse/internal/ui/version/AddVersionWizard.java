@@ -23,40 +23,15 @@ public class AddVersionWizard extends Wizard {
 
 	@Override
 	public boolean performFinish() {
-		boolean success = false;
 		libarySelectorPage.setErrorMessage(null);
 		URL[] urls = libarySelectorPage.getURLs();
 		Version version = libarySelectorPage.getVersion();
+
 		Activator activator = Activator.getDefault();
-		ServiceReference<LiquibaseProvider> providerRef = activator
-				.getLiquibaseProvider(version);
-		if (providerRef != null) {
-			BundleContext ctx = activator.getBundle().getBundleContext();
-			LiquibaseProvider provider = null;
-			try {
-				provider = ctx.getService(providerRef);
-				if (provider != null) {
-					provider.registerLibrary(urls, version);
-				} else {
-					libarySelectorPage
-							.setErrorMessage("Provider unavailable for version "
-									+ version);
-				}
-			} catch (LiquibaseApiException e) {
-				e.printStackTrace();
-				libarySelectorPage
-						.setErrorMessage("Error registering library for version "
-								+ version);
-			} finally {
-				if (provider != null) {
-					ctx.ungetService(providerRef);
-				}
-			}
-		} else {
-			libarySelectorPage.setErrorMessage("No provider found for version "
-					+ version);
-		}
-		return success;
+		String error = activator.storeDescriptor(version, urls);
+
+		libarySelectorPage.setErrorMessage(error);
+		return error == null;
 	}
 
 }

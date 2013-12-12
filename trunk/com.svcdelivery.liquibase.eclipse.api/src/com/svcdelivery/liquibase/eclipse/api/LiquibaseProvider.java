@@ -11,14 +11,14 @@ import org.osgi.framework.Version;
  */
 public interface LiquibaseProvider {
 	/**
-	 * @param libraries
-	 *            The URLs of the library files.
 	 * @param version
 	 *            The version to register.
+	 * @param libraries
+	 *            The URLs of the library files.
 	 * @throws LiquibaseApiException
 	 *             if the library could not be registered.
 	 */
-	void registerLibrary(URL[] libraries, Version version)
+	void registerLibrary(Version version, URL[] libraries)
 			throws LiquibaseApiException;
 
 	/**
