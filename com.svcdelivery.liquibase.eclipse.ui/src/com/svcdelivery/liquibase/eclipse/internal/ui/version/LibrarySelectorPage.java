@@ -18,9 +18,12 @@ package com.svcdelivery.liquibase.eclipse.internal.ui.version;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ListViewer;
 import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -31,9 +34,12 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Version;
+
+import com.svcdelivery.liquibase.eclipse.internal.ui.CollectionContentProvider;
 
 /**
  * @author nick
@@ -42,9 +48,11 @@ public class LibrarySelectorPage extends WizardPage {
 
 	private Text url;
 
+	private ListViewer urlList;
+
 	private Text versionText;
 
-	private List<URL> urls;
+	private Set<URL> urls;
 
 	private Version version;
 
@@ -55,7 +63,7 @@ public class LibrarySelectorPage extends WizardPage {
 		super("Select Library");
 		setTitle("Select Library");
 		setMessage("Enter the URL of a Liquibase jar file and specify the API version that it implements.");
-		urls = new ArrayList<URL>();
+		urls = new HashSet<URL>();
 	}
 
 	@Override
@@ -65,8 +73,9 @@ public class LibrarySelectorPage extends WizardPage {
 
 		Label urlLabel = new Label(root, SWT.NONE);
 		urlLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
+		urlLabel.setText("URL");
 		url = new Text(root, SWT.NONE);
-		url.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		url.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		Button browse = new Button(root, SWT.PUSH);
 		browse.setText("File");
 		browse.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
@@ -75,26 +84,57 @@ public class LibrarySelectorPage extends WizardPage {
 		add.setText("Add");
 		add.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false));
 
+		Label urlListLabel = new Label(root, SWT.NONE);
+		urlListLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false,
+				false));
+		urlListLabel.setText("URLs");
+		urlList = new ListViewer(root, SWT.MULTI);
+		urlList.getList().setLayoutData(
+				new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+		urlList.setContentProvider(new CollectionContentProvider());
+		urlList.setInput(urls);
+
+		Button remove = new Button(root, SWT.PUSH);
+		remove.setText("Remove");
+		remove.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
+
 		Label versionLabel = new Label(root, SWT.NONE);
 		versionLabel.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false,
 				false));
+		versionLabel.setText("Version");
 		versionText = new Text(root, SWT.NONE);
-		versionText.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false,
-				3, 1));
+		versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
+				false, 3, 1));
 
 		add.addSelectionListener(new SelectionAdapter() {
 
 			@Override
-			public void widgetSelected(SelectionEvent e) {
+			public void widgetSelected(final SelectionEvent e) {
+				setErrorMessage(null);
 				String text = url.getText();
 				try {
 					URL lib = new URL(text);
 					urls.add(lib);
+					updateUrlList();
 				} catch (MalformedURLException e1) {
-					e1.printStackTrace();
+					setErrorMessage("Invalid URL.");
 				}
 			}
 
+		});
+		remove.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(final SelectionEvent e) {
+				ISelection selection = urlList.getSelection();
+				if (selection instanceof IStructuredSelection) {
+					IStructuredSelection ss = (IStructuredSelection) selection;
+					if (ss.size() > 0) {
+						urls.removeAll(ss.toList());
+						updateUrlList();
+					}
+				}
+			}
 		});
 		versionText.addModifyListener(new ModifyListener() {
 
@@ -120,5 +160,15 @@ public class LibrarySelectorPage extends WizardPage {
 
 	public Version getVersion() {
 		return version;
+	}
+
+	private void updateUrlList() {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				urlList.refresh();
+			}
+		});
 	}
 }

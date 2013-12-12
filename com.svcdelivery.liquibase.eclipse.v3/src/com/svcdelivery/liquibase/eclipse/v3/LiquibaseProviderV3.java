@@ -1,7 +1,6 @@
 package com.svcdelivery.liquibase.eclipse.v3;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 	}
 
 	@Override
-	public void registerLibrary(URL[] libraries, Version version)
+	public void registerLibrary(Version version, URL[] libraries)
 			throws LiquibaseApiException {
 		ClassLoader cl = new GenericLibraryClassLoader(ctx, libraries);
 		try {
