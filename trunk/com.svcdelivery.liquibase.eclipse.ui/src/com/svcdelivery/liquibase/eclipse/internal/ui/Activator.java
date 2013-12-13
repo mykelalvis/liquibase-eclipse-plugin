@@ -151,13 +151,8 @@ public class Activator extends AbstractUIPlugin {
 							// - OR (the active service is not the default AND
 							// this
 							// service has a higher version number)
-							if ((defaultLiquibaseVersion != null && defaultLiquibaseVersion
-									.equals(serviceVersion))
-									|| activeRef == null
-									|| (activeVersion != null && serviceVersion
-											.compareTo(activeVersion) > 0)
-									&& (defaultLiquibaseVersion == null || !defaultLiquibaseVersion
-											.equals(activeVersion))) {
+							if (shouldActivate(defaultLiquibaseVersion,
+									activeVersion, serviceVersion)) {
 								System.out.println("Setting active version "
 										+ serviceVersion);
 								activeRef = reference;
@@ -196,18 +191,20 @@ public class Activator extends AbstractUIPlugin {
 							ServiceReference<LiquibaseProvider> reference) {
 						VersionRange range = getServiceVersionRangeProperty(
 								reference, COMPATIBILITY);
-						registerLibraries(range);
-						return context.getService(reference);
+						LiquibaseProvider provider = context
+								.getService(reference);
+						registerLibraries(provider, range);
+						return provider;
 					}
 
 					@Override
 					public void modifiedService(
 							ServiceReference<LiquibaseProvider> reference,
-							LiquibaseProvider service) {
+							LiquibaseProvider provider) {
 						VersionRange range = getServiceVersionRangeProperty(
 								reference, COMPATIBILITY);
 						unregisterLibraries(range);
-						registerLibraries(range);
+						registerLibraries(provider, range);
 					}
 
 					@Override
@@ -220,6 +217,26 @@ public class Activator extends AbstractUIPlugin {
 					}
 				});
 		lbpt.open();
+	}
+
+	public boolean shouldActivate(Version defaultLiquibaseVersion,
+			Version activeVersion, Version serviceVersion) {
+		boolean shouldActivate = false;
+		if (serviceVersion != null) {
+			if (defaultLiquibaseVersion == null) {
+				if (activeVersion == null
+						|| activeVersion.compareTo(serviceVersion) < 0) {
+					shouldActivate = true;
+				}
+			} else if (!defaultLiquibaseVersion.equals(activeVersion)) {
+				if (activeVersion == null
+						|| defaultLiquibaseVersion.equals(serviceVersion)
+						|| activeVersion.compareTo(serviceVersion) < 0) {
+					shouldActivate = true;
+				}
+			}
+		}
+		return shouldActivate;
 	}
 
 	private void readPreferences() {
@@ -423,12 +440,14 @@ public class Activator extends AbstractUIPlugin {
 		ServiceReference<LiquibaseProvider> provider = null;
 		ServiceReference<LiquibaseProvider>[] references = lbpt
 				.getServiceReferences();
-		for (ServiceReference<LiquibaseProvider> reference : references) {
-			VersionRange range = getServiceVersionRangeProperty(reference,
-					COMPATIBILITY);
-			if (range != null && range.includes(version)) {
-				provider = reference;
-				break;
+		if (references != null) {
+			for (ServiceReference<LiquibaseProvider> reference : references) {
+				VersionRange range = getServiceVersionRangeProperty(reference,
+						COMPATIBILITY);
+				if (range != null && range.includes(version)) {
+					provider = reference;
+					break;
+				}
 			}
 		}
 		return provider;
@@ -476,12 +495,17 @@ public class Activator extends AbstractUIPlugin {
 		return file;
 	}
 
-	private void registerLibraries(VersionRange range) {
+	private void registerLibraries(LiquibaseProvider provider,
+			VersionRange range) {
 		Map<Version, URL[]> versions = getCompatiblieLibraries(range);
 		for (Entry<Version, URL[]> entry : versions.entrySet()) {
 			Version version = entry.getKey();
 			URL[] urls = entry.getValue();
-			registerLibrary(version, urls);
+			try {
+				provider.registerLibrary(version, urls);
+			} catch (LiquibaseApiException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

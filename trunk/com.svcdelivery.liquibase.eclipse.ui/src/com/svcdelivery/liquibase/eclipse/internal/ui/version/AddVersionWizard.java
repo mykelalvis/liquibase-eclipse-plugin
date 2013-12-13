@@ -3,12 +3,8 @@ package com.svcdelivery.liquibase.eclipse.internal.ui.version;
 import java.net.URL;
 
 import org.eclipse.jface.wizard.Wizard;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
-import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
-import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
 import com.svcdelivery.liquibase.eclipse.internal.ui.Activator;
 
 public class AddVersionWizard extends Wizard {
