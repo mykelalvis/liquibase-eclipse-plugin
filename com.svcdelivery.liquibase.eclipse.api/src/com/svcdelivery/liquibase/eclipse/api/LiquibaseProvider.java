@@ -28,4 +28,11 @@ public interface LiquibaseProvider {
 	 *             if the library could not be registered.
 	 */
 	void unregisterLibrary(Version version) throws LiquibaseApiException;
+
+	/**
+	 * @param version
+	 *            The library version.
+	 * @return A list of jar URLs.
+	 */
+	URL[] getLibraries(Version version);
 }

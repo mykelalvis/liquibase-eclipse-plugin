@@ -21,14 +21,29 @@ import java.util.Collection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import com.svcdelivery.liquibase.eclipse.internal.collections.ListEvent;
+import com.svcdelivery.liquibase.eclipse.internal.collections.NotifyingList;
+import com.svcdelivery.liquibase.eclipse.internal.collections.NotifyingListListener;
+
 /**
  * @author nick
  */
-public class CollectionContentProvider implements IStructuredContentProvider {
+public class CollectionContentProvider<E> implements
+		IStructuredContentProvider, NotifyingListListener<E> {
+	private Viewer viewer;
 
 	@Override
 	public void inputChanged(final Viewer viewer, final Object oldInput,
 			final Object newInput) {
+		if (oldInput instanceof NotifyingList) {
+			NotifyingList<E> ol = (NotifyingList<E>) oldInput;
+			ol.removeListener(this);
+		}
+		this.viewer = viewer;
+		if (newInput instanceof NotifyingList) {
+			NotifyingList<E> nl = (NotifyingList<E>) newInput;
+			nl.addListener(this);
+		}
 	}
 
 	@Override
@@ -43,6 +58,13 @@ public class CollectionContentProvider implements IStructuredContentProvider {
 
 	@Override
 	public void dispose() {
+	}
+
+	@Override
+	public void changed(ListEvent<E> event) {
+		if (viewer != null) {
+			viewer.refresh();
+		}
 	}
 
 }

@@ -57,4 +57,10 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 		}
 	}
 
+	@Override
+	public URL[] getLibraries(Version version) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

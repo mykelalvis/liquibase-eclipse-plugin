@@ -16,7 +16,8 @@
  */
 package com.svcdelivery.liquibase.eclipse.ui.preferences;
 
-import java.util.Arrays;
+import java.net.URL;
+import java.util.List;
 
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -42,7 +43,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.Version;
 
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
 import com.svcdelivery.liquibase.eclipse.internal.ui.Activator;
 import com.svcdelivery.liquibase.eclipse.internal.ui.CollectionContentProvider;
@@ -102,14 +105,14 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		versionColumn.getColumn().setWidth(100);
 		versionColumn.getColumn().setText("Version");
 		versionTable.setHeaderVisible(true);
-		IContentProvider versionContentProvider = new CollectionContentProvider();
+		IContentProvider versionContentProvider = new CollectionContentProvider<ServiceReference<LiquibaseService>>();
 		ITableLabelProvider versionLabelProvider = new LiquibaseServicesLabelProvider();
 		versionViewer.setContentProvider(versionContentProvider);
 		versionViewer.setLabelProvider(versionLabelProvider);
-		ServiceReference<LiquibaseService>[] liquibaseServices = Activator
+		List<ServiceReference<LiquibaseService>> liquibaseServices = Activator
 				.getDefault().getLiquibaseServices();
 		if (liquibaseServices != null) {
-			versionViewer.setInput(Arrays.asList(liquibaseServices));
+			versionViewer.setInput(liquibaseServices);
 		}
 
 		Label serviceLabel = new Label(root, SWT.NONE);
@@ -118,7 +121,10 @@ public class LiquibasePreferencePage extends PreferencePage implements
 				.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		serviceViewer = new TableViewer(root, SWT.FULL_SELECTION | SWT.BORDER
 				| SWT.FLAT);
-		serviceViewer.setContentProvider(new CollectionContentProvider());
+		Table serviceTable = versionViewer.getTable();
+		serviceTable
+				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+		serviceViewer.setContentProvider(new CollectionContentProvider<URL>());
 
 		Button add = new Button(root, SWT.PUSH);
 		add.setText("Add");
@@ -133,20 +139,31 @@ public class LiquibasePreferencePage extends PreferencePage implements
 				dialog.open();
 			}
 		});
+		Button remove = new Button(root, SWT.PUSH);
+		remove.setText("Remove");
+		remove.addSelectionListener(new SelectionAdapter() {
 
+			@Override
+			public void widgetSelected(final SelectionEvent e) {
+				Version selectedVersion = getSelectedVersion();
+				if (selectedVersion != null) {
+					Activator activator = Activator.getDefault();
+					activator.removeDescriptor(selectedVersion);
+				}
+			}
+		});
 		versionViewer
 				.addSelectionChangedListener(new ISelectionChangedListener() {
 
 					@Override
 					public void selectionChanged(SelectionChangedEvent event) {
-						ISelection selection = event.getSelection();
-						if (selection instanceof StructuredSelection) {
-							StructuredSelection ss = (StructuredSelection) selection;
-							if (ss.size() == 1) {
-								Object item = ss.getFirstElement();
-								serviceViewer.setInput(item);
-							}
+						Version version = getSelectedVersion();
+						Activator activator = Activator.getDefault();
+						ServiceReference<LiquibaseProvider> provider = activator.getLiquibaseProvider(version);
+						if (provider != null) {
+							// TODO get library URL list.
 						}
+						serviceViewer.setInput(getSelectedLibrary());
 					}
 				});
 
@@ -160,6 +177,27 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		applyDialogFont(root);
 
 		return root;
+	}
+
+	private Version getSelectedVersion() {
+		Version version = null;
+		ServiceReference<LiquibaseService> ref = getSelectedLibrary();
+		if (ref != null) {
+			version = ref.getBundle().getVersion();
+		}
+		return version;
+	}
+
+	private ServiceReference<LiquibaseService> getSelectedLibrary() {
+		ServiceReference<LiquibaseService> ref = null;
+		ISelection selection = versionViewer.getSelection();
+		if (selection instanceof StructuredSelection) {
+			StructuredSelection ss = (StructuredSelection) selection;
+			if (ss.size() == 1) {
+				ref = (ServiceReference<LiquibaseService>) ss.getFirstElement();
+			}
+		}
+		return ref;
 	}
 
 	@Override
