@@ -25,6 +25,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -45,6 +46,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseApiException;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
+import com.svcdelivery.liquibase.eclipse.internal.collections.NotifyingArrayList;
 
 /**
  * The activator class controls the plug-in life cycle.
@@ -92,6 +94,8 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	private ServiceTracker<LiquibaseService, LiquibaseService> lbst;
 
+	private NotifyingArrayList<ServiceReference<LiquibaseService>> services;
+
 	/**
 	 * Liquibase service tracker.
 	 */
@@ -119,6 +123,7 @@ public class Activator extends AbstractUIPlugin {
 	public final void start(final BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		services = new NotifyingArrayList<ServiceReference<LiquibaseService>>();
 		databaseUpdateListeners = new HashSet<DatabaseUpdateListener>();
 		changeLogCache = new ChangeLogCache();
 		results = new LiquibaseResults();
@@ -137,6 +142,7 @@ public class Activator extends AbstractUIPlugin {
 					@Override
 					public LiquibaseService addingService(
 							ServiceReference<LiquibaseService> reference) {
+						services.add(reference);
 						LiquibaseService svc = null;
 						Version serviceVersion = getServiceVersion(reference);
 						if (serviceVersion != null) {
@@ -172,6 +178,7 @@ public class Activator extends AbstractUIPlugin {
 					public void removedService(
 							ServiceReference<LiquibaseService> reference,
 							LiquibaseService service) {
+						services.remove(reference);
 						if (reference.equals(activeRef)) {
 							active = null;
 							activeRef = null;
@@ -352,8 +359,8 @@ public class Activator extends AbstractUIPlugin {
 	/**
 	 * @return An array of service references to available liquibase services.
 	 */
-	public final ServiceReference<LiquibaseService>[] getLiquibaseServices() {
-		return lbst.getServiceReferences();
+	public final List<ServiceReference<LiquibaseService>> getLiquibaseServices() {
+		return services;
 	}
 
 	/**
@@ -472,6 +479,17 @@ public class Activator extends AbstractUIPlugin {
 			e.printStackTrace();
 		}
 		return error;
+	}
+
+	public void removeDescriptor(Version version) {
+		Properties vp = getVersionProprties();
+		vp.remove(version.toString());
+		try {
+			unregisterLibrary(version);
+			vp.store(new FileWriter(getVersionPropertiesFile()), "");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private Properties getVersionProprties() {
