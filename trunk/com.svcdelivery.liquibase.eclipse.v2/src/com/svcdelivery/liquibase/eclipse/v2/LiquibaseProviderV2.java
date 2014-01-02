@@ -19,14 +19,18 @@ public class LiquibaseProviderV2 implements LiquibaseProvider {
 
 	private Map<Version, ServiceRegistration<LiquibaseService>> register;
 
+	private Map<Version, URL[]> versionLibraries;
+
 	public void activate(BundleContext ctx) {
 		this.ctx = ctx;
 		register = new HashMap<Version, ServiceRegistration<LiquibaseService>>();
+		versionLibraries = new HashMap<Version, URL[]>();
 	}
 
 	@Override
 	public void registerLibrary(Version version, URL[] libraries)
 			throws LiquibaseApiException {
+		versionLibraries.put(version, libraries);
 		ClassLoader cl = new GenericLibraryClassLoader(ctx, libraries);
 		try {
 			Class<?> c = cl.loadClass(LiquibaseServiceV2.class.getName());
@@ -55,12 +59,12 @@ public class LiquibaseProviderV2 implements LiquibaseProvider {
 			register.remove(version);
 			reg.unregister();
 		}
+		versionLibraries.remove(version);
 	}
 
 	@Override
 	public URL[] getLibraries(Version version) {
-		// TODO Auto-generated method stub
-		return null;
+		return versionLibraries.get(version);
 	}
 
 }

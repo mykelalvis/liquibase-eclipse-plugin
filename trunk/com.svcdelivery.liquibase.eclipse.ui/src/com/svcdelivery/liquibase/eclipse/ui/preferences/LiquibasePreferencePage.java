@@ -159,7 +159,8 @@ public class LiquibasePreferencePage extends PreferencePage implements
 					public void selectionChanged(SelectionChangedEvent event) {
 						Version version = getSelectedVersion();
 						Activator activator = Activator.getDefault();
-						ServiceReference<LiquibaseProvider> provider = activator.getLiquibaseProvider(version);
+						ServiceReference<LiquibaseProvider> provider = activator
+								.getLiquibaseProvider(version);
 						if (provider != null) {
 							// TODO get library URL list.
 						}
@@ -183,7 +184,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		Version version = null;
 		ServiceReference<LiquibaseService> ref = getSelectedLibrary();
 		if (ref != null) {
-			version = ref.getBundle().getVersion();
+			version = Version.parseVersion((String) ref.getProperty("version"));
 		}
 		return version;
 	}
