@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.svcdelivery</groupId>
 	<artifactId>com.svcdelivery.liquibase.eclipse</artifactId>
-	<version>1.2.1-SNAPSHOT</version>
+	<version>1.3.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<properties>
 		<tycho-version>0.18.1</tycho-version>
@@ -49,6 +49,8 @@
 				<configuration>
 					<useUIHarness>true</useUIHarness>
 					<useUIThread>false</useUIThread>
+					<product>org.eclipse.sdk.ide</product>
+					<application>org.eclipse.ui.ide.workbench</application>
 					<!--failIfNoTests>true</failIfNoTests -->
 					<!-- <debugPort>31337</debugPort> -->
 				</configuration>
@@ -57,9 +59,14 @@
 	</build>
 	<repositories>
 		<repository>
-			<id>eclipse-indigo</id>
+			<id>eclipse-kepler</id>
 			<layout>p2</layout>
-			<url>http://download.eclipse.org/releases/indigo</url>
+			<url>http://download.eclipse.org/releases/kepler</url>
+		</repository>
+		<repository>
+			<id>swtbot</id>
+			<layout>p2</layout>
+			<url>http://download.eclipse.org/technology/swtbot/releases/latest/</url>
 		</repository>
 		<repository>
 			<id>liquibase-eclipse-plugin</id>
@@ -72,7 +79,7 @@
 		<module>../com.svcdelivery.liquibase.eclipse.feature</module>
 		<module>../com.svcdelivery.liquibase.eclipse.site</module>
 		<module>../com.svcdelivery.liquibase.eclipse.ui</module>
-		<!--module>../com.svcdelivery.liquibase.eclipse.ui.test</module-->
+		<module>../com.svcdelivery.liquibase.eclipse.ui.test</module>
 		<module>../com.svcdelivery.liquibase.eclipse.v2</module>
 		<module>../com.svcdelivery.liquibase.eclipse.v3</module>
 	</modules>

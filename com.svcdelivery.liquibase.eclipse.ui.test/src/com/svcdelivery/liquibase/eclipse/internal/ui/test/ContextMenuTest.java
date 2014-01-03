@@ -18,6 +18,6 @@ public class ContextMenuTest {
 	
 	@Test
 	public void testContextMenuExists() {
-
+		
 	}
 }

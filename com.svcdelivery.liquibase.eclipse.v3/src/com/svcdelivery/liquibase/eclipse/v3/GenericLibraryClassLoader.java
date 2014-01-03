@@ -1,9 +1,10 @@
 package com.svcdelivery.liquibase.eclipse.v3;
 
 import java.net.URL;
-import java.net.URLClassLoader;
 
 import org.osgi.framework.BundleContext;
+
+import com.svcdelivery.liquibase.eclipse.api.AbstractGenericLibraryClassLoader;
 
 /**
  * Classes from package "com.svcdelivery.liquibase.eclipse.v3" are loaded from
@@ -12,26 +13,16 @@ import org.osgi.framework.BundleContext;
  * @author nick
  * 
  */
-public class GenericLibraryClassLoader extends ClassLoader {
-
-	private BundleContext ctx;
-	private URLClassLoader urlc;
+public class GenericLibraryClassLoader extends
+		AbstractGenericLibraryClassLoader {
 
 	public GenericLibraryClassLoader(BundleContext ctx, URL[] libraries) {
-		this.ctx = ctx;
-		urlc = new URLClassLoader(libraries);
+		super(ctx, libraries);
 	}
 
 	@Override
-	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		Class<?> c = null;
-		if (name.startsWith("com.svcdelivery.liquibase.eclipse.v3")) {
-			c = ctx.getBundle().loadClass(name);
-		}
-		if (c == null) {
-			c = urlc.loadClass(name);
-		}
-		return c;
+	protected String getPackage() {
+		return "com.svcdelivery.liquibase.eclipse.v3";
 	}
 
 }

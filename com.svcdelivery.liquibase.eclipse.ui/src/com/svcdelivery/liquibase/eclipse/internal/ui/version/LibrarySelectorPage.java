@@ -16,6 +16,7 @@
  */
 package com.svcdelivery.liquibase.eclipse.internal.ui.version;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashSet;
@@ -114,9 +115,16 @@ public class LibrarySelectorPage extends WizardPage {
 					public void run() {
 						FileDialog fd = new FileDialog(getShell());
 						fd.setFilterExtensions(new String[] { "*.jar" });
-						String file = fd.open();
-						if (file != null) {
-							url.setText("file://" + file);
+						String filename = fd.open();
+						if (filename != null) {
+							File file = new File(filename);
+							if (file != null) {
+								try {
+									url.setText(file.toURI().toURL().toString());
+								} catch (MalformedURLException e) {
+									e.printStackTrace();
+								}
+							}
 						}
 					}
 				});
