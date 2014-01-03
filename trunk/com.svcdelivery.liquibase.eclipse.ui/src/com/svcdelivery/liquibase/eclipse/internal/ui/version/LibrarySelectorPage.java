@@ -35,6 +35,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.osgi.framework.Version;
@@ -91,7 +92,7 @@ public class LibrarySelectorPage extends WizardPage {
 		urlList = new ListViewer(root, SWT.MULTI);
 		urlList.getList().setLayoutData(
 				new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-		urlList.setContentProvider(new CollectionContentProvider());
+		urlList.setContentProvider(new CollectionContentProvider<URL>());
 		urlList.setInput(urls);
 
 		Button remove = new Button(root, SWT.PUSH);
@@ -106,6 +107,21 @@ public class LibrarySelectorPage extends WizardPage {
 		versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 3, 1));
 
+		browse.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(final SelectionEvent e) {
+				Display.getDefault().asyncExec(new Runnable() {
+					public void run() {
+						FileDialog fd = new FileDialog(getShell());
+						fd.setFilterExtensions(new String[] { "*.jar" });
+						String file = fd.open();
+						if (file != null) {
+							url.setText("file://" + file);
+						}
+					}
+				});
+			}
+		});
 		add.addSelectionListener(new SelectionAdapter() {
 
 			@Override

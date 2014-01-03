@@ -20,6 +20,7 @@ import java.util.Collection;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.swt.widgets.Display;
 
 import com.svcdelivery.liquibase.eclipse.internal.collections.ListEvent;
 import com.svcdelivery.liquibase.eclipse.internal.collections.NotifyingList;
@@ -63,7 +64,13 @@ public class CollectionContentProvider<E> implements
 	@Override
 	public void changed(ListEvent<E> event) {
 		if (viewer != null) {
-			viewer.refresh();
+			Display.getDefault().asyncExec(new Runnable() {
+
+				@Override
+				public void run() {
+					viewer.refresh();
+				}
+			});
 		}
 	}
 
