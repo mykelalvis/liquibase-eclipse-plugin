@@ -445,15 +445,17 @@ public class Activator extends AbstractUIPlugin {
 	public ServiceReference<LiquibaseProvider> getLiquibaseProvider(
 			Version version) {
 		ServiceReference<LiquibaseProvider> provider = null;
-		ServiceReference<LiquibaseProvider>[] references = lbpt
-				.getServiceReferences();
-		if (references != null) {
-			for (ServiceReference<LiquibaseProvider> reference : references) {
-				VersionRange range = getServiceVersionRangeProperty(reference,
-						COMPATIBILITY);
-				if (range != null && range.includes(version)) {
-					provider = reference;
-					break;
+		if (version != null) {
+			ServiceReference<LiquibaseProvider>[] references = lbpt
+					.getServiceReferences();
+			if (references != null) {
+				for (ServiceReference<LiquibaseProvider> reference : references) {
+					VersionRange range = getServiceVersionRangeProperty(
+							reference, COMPATIBILITY);
+					if (range != null && range.includes(version)) {
+						provider = reference;
+						break;
+					}
 				}
 			}
 		}
