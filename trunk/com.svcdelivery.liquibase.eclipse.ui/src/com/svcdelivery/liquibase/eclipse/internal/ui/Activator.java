@@ -150,19 +150,11 @@ public class Activator extends AbstractUIPlugin {
 									+ serviceVersion);
 							Version activeVersion = getServiceVersion(activeRef);
 							svc = context.getService(reference);
-							// If
-							// - This is the default
-							// - OR the active service is null
-
-							// - OR (the active service is not the default AND
-							// this
-							// service has a higher version number)
 							if (shouldActivate(defaultLiquibaseVersion,
 									activeVersion, serviceVersion)) {
-								System.out.println("Setting active version "
-										+ serviceVersion);
-								activeRef = reference;
-								active = svc;
+								setActiveLiquibaseService(reference);
+								// activeRef = reference;
+								// active = svc;
 							}
 						}
 						return svc;
@@ -381,6 +373,8 @@ public class Activator extends AbstractUIPlugin {
 		}
 		activeRef = ref;
 		if (ref != null) {
+			Version serviceVersion = getServiceVersion(ref);
+			System.out.println("Setting active version " + serviceVersion);
 			active = bundleContext.getService(activeRef);
 		}
 	}

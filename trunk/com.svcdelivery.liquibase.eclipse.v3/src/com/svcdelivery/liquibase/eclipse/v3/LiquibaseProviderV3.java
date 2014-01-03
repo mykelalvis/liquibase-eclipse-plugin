@@ -45,6 +45,8 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 			}
 		} catch (ClassNotFoundException e) {
 			throw new LiquibaseApiException("Class not found " + e.getMessage());
+		} catch (NoClassDefFoundError e) {
+			throw new LiquibaseApiException("Class not found " + e.getMessage());
 		} catch (InstantiationException e) {
 			throw new LiquibaseApiException(e.getMessage());
 		} catch (IllegalAccessException e) {
