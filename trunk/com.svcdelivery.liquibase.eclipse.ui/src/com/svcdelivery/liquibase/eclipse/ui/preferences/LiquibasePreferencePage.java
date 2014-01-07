@@ -42,11 +42,13 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
 import com.svcdelivery.liquibase.eclipse.api.LiquibaseService;
+import com.svcdelivery.liquibase.eclipse.internal.collections.NotifyingArrayList;
 import com.svcdelivery.liquibase.eclipse.internal.ui.Activator;
 import com.svcdelivery.liquibase.eclipse.internal.ui.CollectionContentProvider;
 import com.svcdelivery.liquibase.eclipse.internal.ui.version.AddVersionWizard;
@@ -121,10 +123,11 @@ public class LiquibasePreferencePage extends PreferencePage implements
 				.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		serviceViewer = new TableViewer(root, SWT.FULL_SELECTION | SWT.BORDER
 				| SWT.FLAT);
-		Table serviceTable = versionViewer.getTable();
+		Table serviceTable = serviceViewer.getTable();
 		serviceTable
 				.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		serviceViewer.setContentProvider(new CollectionContentProvider<URL>());
+		serviceViewer.setLabelProvider(new URLLabelProvider());
 
 		Button add = new Button(root, SWT.PUSH);
 		add.setText("Add");
@@ -163,8 +166,21 @@ public class LiquibasePreferencePage extends PreferencePage implements
 								.getLiquibaseProvider(version);
 						if (provider != null) {
 							// TODO get library URL list.
+							BundleContext ctx = Activator.getDefault()
+									.getBundle().getBundleContext();
+							LiquibaseProvider service = ctx
+									.getService(provider);
+							URL[] libraries = service.getLibraries(version);
+							if (libraries == null) {
+								libraries = new URL[0];
+							}
+							NotifyingArrayList<URL> list = new NotifyingArrayList<URL>(
+									libraries);
+							serviceViewer.setInput(list);
+							ctx.ungetService(provider);
+						} else {
+							serviceViewer.setInput(null);
 						}
-						serviceViewer.setInput(getSelectedLibrary());
 					}
 				});
 
