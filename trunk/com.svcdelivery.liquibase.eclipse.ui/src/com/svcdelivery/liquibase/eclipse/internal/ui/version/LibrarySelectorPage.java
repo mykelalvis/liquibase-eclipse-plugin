@@ -39,8 +39,12 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.Version;
 
+import com.svcdelivery.liquibase.eclipse.api.LiquibaseProvider;
+import com.svcdelivery.liquibase.eclipse.internal.ui.Activator;
 import com.svcdelivery.liquibase.eclipse.internal.ui.CollectionContentProvider;
 
 /**
@@ -61,11 +65,23 @@ public class LibrarySelectorPage extends WizardPage {
 	/**
 	 * Constructor.
 	 */
-	protected LibrarySelectorPage() {
+	protected LibrarySelectorPage(Version selectedVersion) {
 		super("Select Library");
 		setTitle("Select Library");
 		setMessage("Enter the URL of a Liquibase jar file and specify the API version that it implements.");
 		urls = new HashSet<URL>();
+		if (selectedVersion != null) {
+			version = selectedVersion;
+			ServiceReference<LiquibaseProvider> provider = Activator
+					.getDefault().getLiquibaseProvider(version);
+			BundleContext ctx = Activator.getDefault().getBundle()
+					.getBundleContext();
+			LiquibaseProvider service = ctx.getService(provider);
+			URL[] libraries = service.getLibraries(version);
+			for (URL next : libraries) {
+				urls.add(next);
+			}
+		}
 	}
 
 	@Override
@@ -107,6 +123,9 @@ public class LibrarySelectorPage extends WizardPage {
 		versionText = new Text(root, SWT.NONE);
 		versionText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 3, 1));
+		if (version != null) {
+			versionText.setText(version.toString());
+		}
 
 		browse.addSelectionListener(new SelectionAdapter() {
 			@Override

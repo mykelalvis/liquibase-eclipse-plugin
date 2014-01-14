@@ -1,6 +1,7 @@
 package com.svcdelivery.liquibase.eclipse.v3;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -44,9 +45,13 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 				register.put(version, reg);
 			}
 		} catch (ClassNotFoundException e) {
-			throw new LiquibaseApiException("Class not found " + e.getMessage());
+			throw new LiquibaseApiException("Registering library version "
+					+ version.toString() + ": Class not found "
+					+ e.getMessage());
 		} catch (NoClassDefFoundError e) {
-			throw new LiquibaseApiException("Class not found " + e.getMessage());
+			throw new LiquibaseApiException("Registering library version "
+					+ version.toString() + ": Class not found "
+					+ e.getMessage());
 		} catch (InstantiationException e) {
 			throw new LiquibaseApiException(e.getMessage());
 		} catch (IllegalAccessException e) {
@@ -66,6 +71,27 @@ public class LiquibaseProviderV3 implements LiquibaseProvider {
 	@Override
 	public URL[] getLibraries(Version version) {
 		return versionLibraries.get(version);
+	}
+
+	@Override
+	public void addLibrary(Version version, URL url) {
+		URL[] current = versionLibraries.get(version);
+		if (current == null) {
+			current = new URL[] { url };
+		} else {
+			current = Arrays.copyOf(current, current.length + 1);
+			current[current.length - 1] = url;
+		}
+		versionLibraries.put(version, current);
+	}
+
+	@Override
+	public void removeLibrary(Version version, URL url) {
+		URL[] current = versionLibraries.get(version);
+		if (current != null) {
+			current = Arrays.copyOf(current, current.length - 1);
+			versionLibraries.put(version, current);
+		}
 	}
 
 }

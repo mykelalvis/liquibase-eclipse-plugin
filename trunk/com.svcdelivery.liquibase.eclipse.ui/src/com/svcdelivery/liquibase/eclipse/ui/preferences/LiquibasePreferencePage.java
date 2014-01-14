@@ -35,6 +35,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -118,7 +119,7 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		}
 
 		Label serviceLabel = new Label(root, SWT.NONE);
-		serviceLabel.setText("Additional Services:");
+		serviceLabel.setText("Libraries:");
 		serviceLabel
 				.setLayoutData(new GridData(SWT.FILL, SWT.TOP, false, false));
 		serviceViewer = new TableViewer(root, SWT.FULL_SELECTION | SWT.BORDER
@@ -129,7 +130,11 @@ public class LiquibasePreferencePage extends PreferencePage implements
 		serviceViewer.setContentProvider(new CollectionContentProvider<URL>());
 		serviceViewer.setLabelProvider(new URLLabelProvider());
 
-		Button add = new Button(root, SWT.PUSH);
+		Composite buttons = new Composite(root, SWT.NONE);
+		buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 2, 1));
+		buttons.setLayout(new RowLayout());
+
+		Button add = new Button(buttons, SWT.PUSH);
 		add.setText("Add");
 		add.addSelectionListener(new SelectionAdapter() {
 
@@ -142,7 +147,21 @@ public class LiquibasePreferencePage extends PreferencePage implements
 				dialog.open();
 			}
 		});
-		Button remove = new Button(root, SWT.PUSH);
+		Button modify = new Button(buttons, SWT.PUSH);
+		modify.setText("Modify");
+		modify.addSelectionListener(new SelectionAdapter() {
+
+			@Override
+			public void widgetSelected(final SelectionEvent e) {
+				// Show Modify Version wizard
+				AddVersionWizard addVersion = new AddVersionWizard(
+						getSelectedVersion());
+				WizardDialog dialog = new WizardDialog(getShell(), addVersion);
+				dialog.setPageSize(400, 400);
+				dialog.open();
+			}
+		});
+		Button remove = new Button(buttons, SWT.PUSH);
 		remove.setText("Remove");
 		remove.addSelectionListener(new SelectionAdapter() {
 
@@ -165,7 +184,6 @@ public class LiquibasePreferencePage extends PreferencePage implements
 						ServiceReference<LiquibaseProvider> provider = activator
 								.getLiquibaseProvider(version);
 						if (provider != null) {
-							// TODO get library URL list.
 							BundleContext ctx = Activator.getDefault()
 									.getBundle().getBundleContext();
 							LiquibaseProvider service = ctx

@@ -1,6 +1,7 @@
 package com.svcdelivery.liquibase.eclipse.v2;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
@@ -65,6 +66,27 @@ public class LiquibaseProviderV2 implements LiquibaseProvider {
 	@Override
 	public URL[] getLibraries(Version version) {
 		return versionLibraries.get(version);
+	}
+
+	@Override
+	public void addLibrary(Version version, URL url) {
+		URL[] current = versionLibraries.get(version);
+		if (current == null) {
+			current = new URL[] { url };
+		} else {
+			current = Arrays.copyOf(current, current.length + 1);
+			current[current.length - 1] = url;
+		}
+		versionLibraries.put(version, current);
+	}
+
+	@Override
+	public void removeLibrary(Version version, URL url) {
+		URL[] current = versionLibraries.get(version);
+		if (current != null) {
+			current = Arrays.copyOf(current, current.length - 1);
+			versionLibraries.put(version, current);
+		}
 	}
 
 }
