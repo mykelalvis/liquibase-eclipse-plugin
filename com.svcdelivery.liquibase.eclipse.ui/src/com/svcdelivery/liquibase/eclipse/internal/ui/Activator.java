@@ -32,6 +32,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
@@ -511,26 +512,37 @@ public class Activator extends AbstractUIPlugin {
 
 	private void registerLibraries(LiquibaseProvider provider,
 			VersionRange range) {
-		Map<Version, URL[]> versions = getCompatiblieLibraries(range);
+		Map<Version, URL[]> versions = getCompatibleLibraries(range);
 		for (Entry<Version, URL[]> entry : versions.entrySet()) {
 			Version version = entry.getKey();
 			URL[] urls = entry.getValue();
 			try {
 				provider.registerLibrary(version, urls);
 			} catch (LiquibaseApiException e) {
-				e.printStackTrace();
+				getLog().log(
+						new Status(Status.WARNING, PLUGIN_ID, "Verion "
+								+ version.toString()
+								+ " invalid, removing service."));
+				Properties vp = getVersionProprties();
+				vp.remove(version.toString());
+				try {
+					vp.store(new FileWriter(getVersionPropertiesFile()), "");
+				} catch (IOException ex) {
+					e.printStackTrace();
+				}
+
 			}
 		}
 	}
 
 	private void unregisterLibraries(VersionRange range) {
-		Map<Version, URL[]> versions = getCompatiblieLibraries(range);
+		Map<Version, URL[]> versions = getCompatibleLibraries(range);
 		for (Version version : versions.keySet()) {
 			unregisterLibrary(version);
 		}
 	}
 
-	private Map<Version, URL[]> getCompatiblieLibraries(VersionRange range) {
+	private Map<Version, URL[]> getCompatibleLibraries(VersionRange range) {
 		Map<Version, URL[]> versions = new HashMap<Version, URL[]>();
 		Properties properties = getVersionProprties();
 		for (Entry<Object, Object> entry : properties.entrySet()) {

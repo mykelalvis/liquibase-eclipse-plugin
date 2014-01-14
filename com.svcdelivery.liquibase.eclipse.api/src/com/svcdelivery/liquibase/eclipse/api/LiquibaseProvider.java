@@ -35,4 +35,20 @@ public interface LiquibaseProvider {
 	 * @return A list of jar URLs.
 	 */
 	URL[] getLibraries(Version version);
+
+	/**
+	 * @param version
+	 *            The version to add to.
+	 * @param url
+	 *            The library to add.
+	 */
+	void addLibrary(Version version, URL url);
+
+	/**
+	 * @param version
+	 *            The version to remove from.
+	 * @param url
+	 *            The library to remove.
+	 */
+	void removeLibrary(Version version, URL url);
 }

@@ -11,9 +11,18 @@ public class AddVersionWizard extends Wizard {
 
 	private LibrarySelectorPage libarySelectorPage;
 
+	private Version selectedVersion;
+
+	public AddVersionWizard() {
+	}
+
+	public AddVersionWizard(Version selectedVersion) {
+		this.selectedVersion = selectedVersion;
+	}
+
 	@Override
 	public void addPages() {
-		libarySelectorPage = new LibrarySelectorPage();
+		libarySelectorPage = new LibrarySelectorPage(selectedVersion);
 		addPage(libarySelectorPage);
 	}
 
