@@ -21,6 +21,8 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.osgi.framework.ServiceReference;
 
+import com.svcdelivery.liquibase.eclipse.internal.ui.Activator;
+
 public class LiquibaseServicesLabelProvider implements ITableLabelProvider {
 
 	@Override
@@ -42,7 +44,14 @@ public class LiquibaseServicesLabelProvider implements ITableLabelProvider {
 
 	@Override
 	public Image getColumnImage(Object element, int columnIndex) {
-		return null;
+		Image image = null;
+		if (columnIndex == 0 && element instanceof ServiceReference) {
+			ServiceReference<?> ref = (ServiceReference<?>) element;
+			if (ref.getProperty("locked") != null) {
+				image = Activator.getImage("database.gif");
+			}
+		}
+		return image;
 	}
 
 	@Override
