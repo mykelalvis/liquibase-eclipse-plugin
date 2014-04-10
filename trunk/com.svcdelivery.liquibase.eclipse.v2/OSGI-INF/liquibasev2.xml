@@ -5,4 +5,5 @@
       <provide interface="com.svcdelivery.liquibase.eclipse.api.LiquibaseService"/>
    </service>
    <property name="version" type="String" value="2.0.5"/>
+   <property name="locked" type="Boolean" value="true"/>
 </scr:component>

@@ -65,7 +65,7 @@ public class LibrarySelectorPage extends WizardPage {
 	/**
 	 * Constructor.
 	 */
-	protected LibrarySelectorPage(Version selectedVersion) {
+	protected LibrarySelectorPage(final Version selectedVersion) {
 		super("Select Library");
 		setTitle("Select Library");
 		setMessage("Enter the URL of a Liquibase jar file and specify the API version that it implements.");
@@ -74,12 +74,18 @@ public class LibrarySelectorPage extends WizardPage {
 			version = selectedVersion;
 			ServiceReference<LiquibaseProvider> provider = Activator
 					.getDefault().getLiquibaseProvider(version);
-			BundleContext ctx = Activator.getDefault().getBundle()
-					.getBundleContext();
-			LiquibaseProvider service = ctx.getService(provider);
-			URL[] libraries = service.getLibraries(version);
-			for (URL next : libraries) {
-				urls.add(next);
+			if (provider != null) {
+				BundleContext ctx = Activator.getDefault().getBundle()
+						.getBundleContext();
+				LiquibaseProvider service = ctx.getService(provider);
+				if (service != null) {
+					URL[] libraries = service.getLibraries(version);
+					if (libraries != null) {
+						for (URL next : libraries) {
+							urls.add(next);
+						}
+					}
+				}
 			}
 		}
 	}
