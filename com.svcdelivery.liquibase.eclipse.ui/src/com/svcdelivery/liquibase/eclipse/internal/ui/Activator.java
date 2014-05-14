@@ -65,6 +65,8 @@ public class Activator extends AbstractUIPlugin {
 
 	protected static final String COMPATIBILITY = "compatibility";
 
+	protected static final String EMBEDDED_VERSION = "embedded";
+
 	/**
 	 * The shared instance.
 	 */
@@ -193,6 +195,11 @@ public class Activator extends AbstractUIPlugin {
 								reference, COMPATIBILITY);
 						LiquibaseProvider provider = context
 								.getService(reference);
+						Version embedded = getServiceVersionProperty(reference,
+								EMBEDDED_VERSION);
+						if (embedded != null) {
+							registerEmbeddedLibrary(provider, embedded);
+						}
 						registerLibraries(provider, range);
 						return provider;
 					}
@@ -203,16 +210,29 @@ public class Activator extends AbstractUIPlugin {
 							LiquibaseProvider provider) {
 						VersionRange range = getServiceVersionRangeProperty(
 								reference, COMPATIBILITY);
+						Version embedded = getServiceVersionProperty(reference,
+								EMBEDDED_VERSION);
+						if (embedded != null) {
+							unregisterEmbeddedLibrary(provider, embedded);
+						}
 						unregisterLibraries(range);
+						if (embedded != null) {
+							registerEmbeddedLibrary(provider, embedded);
+						}
 						registerLibraries(provider, range);
 					}
 
 					@Override
 					public void removedService(
 							ServiceReference<LiquibaseProvider> reference,
-							LiquibaseProvider service) {
+							LiquibaseProvider provider) {
 						VersionRange range = getServiceVersionRangeProperty(
 								reference, COMPATIBILITY);
+						Version embedded = getServiceVersionProperty(reference,
+								EMBEDDED_VERSION);
+						if (embedded != null) {
+							unregisterEmbeddedLibrary(provider, embedded);
+						}
 						unregisterLibraries(range);
 					}
 				});
@@ -520,7 +540,7 @@ public class Activator extends AbstractUIPlugin {
 				provider.registerLibrary(version, urls);
 			} catch (LiquibaseApiException e) {
 				getLog().log(
-						new Status(Status.WARNING, PLUGIN_ID, "Verion "
+						new Status(Status.WARNING, PLUGIN_ID, "Version "
 								+ version.toString()
 								+ " invalid, removing service."));
 				Properties vp = getVersionProprties();
@@ -590,6 +610,24 @@ public class Activator extends AbstractUIPlugin {
 			error = "No provider found for version " + version;
 		}
 		return error;
+	}
+
+	private void registerEmbeddedLibrary(LiquibaseProvider provider,
+			Version embedded) {
+		try {
+			provider.registerLibrary(embedded, null);
+		} catch (LiquibaseApiException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void unregisterEmbeddedLibrary(LiquibaseProvider provider,
+			Version embedded) {
+		try {
+			provider.unregisterLibrary(embedded);
+		} catch (LiquibaseApiException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private String unregisterLibrary(Version version) {
