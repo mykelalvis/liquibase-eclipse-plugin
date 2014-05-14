@@ -7,7 +7,7 @@ import org.osgi.framework.BundleContext;
 import com.svcdelivery.liquibase.eclipse.api.AbstractGenericLibraryClassLoader;
 
 /**
- * Classes from package "com.svcdelivery.liquibase.eclipse.v3" are loaded from
+ * Classes from package "com.svcdelivery.liquibase.eclipse.v2" are loaded from
  * this bundle, all others are loaded from the provided libraries.
  * 
  * @author nick
